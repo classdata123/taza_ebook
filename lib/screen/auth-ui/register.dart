@@ -4,9 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:get/get.dart';
-import 'package:lottie/lottie.dart';
 
-import 'login.dart'; // Login screen ka import
+import 'login.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -29,173 +28,130 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return KeyboardVisibilityBuilder(
       builder: (context, visible) {
         return Scaffold(
-          appBar: AppBar(backgroundColor: AppConstant.appMainbg, title: Text("Register")),
-          body: SingleChildScrollView(
-            child: Column(
-              children: [
-                // Animation
-                // Container(
-                //   color: AppConstant.appMainbg,
-                //   child: Lottie.asset('assets/image/splash.json'),
-                // ),
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () => Get.back(),
+            ),
+          ),
+          body: Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Register",
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      "Please fill your details to signup.",
+                      style: TextStyle(fontSize: 16, color: Colors.black54),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 20),
 
-                // Email Field
-                Container(
-                  width: Get.width,
-                  margin: EdgeInsets.all(20),
-                  child: TextFormField(
-                    controller: email,
-                    cursorColor: AppConstant.appMainColor,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      hintText: 'Email',
-                      prefixIcon: Icon(Icons.email),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20.0),
+                    // Name Field
+                    _buildTextField(controller: name, hint: "Username", icon: Icons.person),
+                    
+                    // Email Field
+                    _buildTextField(controller: email, hint: "Email", icon: Icons.email),
+
+                    // Password Field
+                    _buildTextField(controller: password, hint: "Password", icon: Icons.lock, obscure: true),
+
+                    // Confirm Password Field
+                    _buildTextField(controller: phone, hint: "Confirm Password", icon: Icons.lock, obscure: true),
+
+                    SizedBox(height: 20),
+
+                    // Register Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        onPressed: () async {
+                          if (name.text.isEmpty || phone.text.isEmpty || email.text.isEmpty || password.text.isEmpty) {
+                            Get.snackbar("Error", "Please fill all fields", backgroundColor: Colors.red, colorText: Colors.white);
+                          } else {
+                            try {
+                              UserCredential userCredential = await auth.createUserWithEmailAndPassword(
+                                email: email.text,
+                                password: password.text,
+                              );
+                              await db.collection('users').doc(userCredential.user!.uid).set({
+                                'uid': userCredential.user!.uid,
+                                'name': name.text,
+                                'email': email.text,
+                                'image': 'null',
+                                'isAdmin': false,
+                                'phone': phone.text,
+                              });
+                              Get.snackbar("Success", "User Registered Successfully!", backgroundColor: Colors.green, colorText: Colors.white);
+                              Get.to(() => LoginScreen());
+                            } catch (e) {
+                              Get.snackbar("Error", "Error: $e", backgroundColor: Colors.red, colorText: Colors.white);
+                            }
+                          }
+                        },
+                        child: Text("Register", style: TextStyle(color: Colors.white, fontSize: 16)),
                       ),
                     ),
-                  ),
-                ),
 
-                // Password Field
-                Container(
-                  width: Get.width,
-                  margin: EdgeInsets.all(20),
-                  child: TextFormField(
-                    controller: password,
-                    cursorColor: AppConstant.appMainColor,
-                    keyboardType: TextInputType.visiblePassword,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      hintText: 'Password',
-                      prefixIcon: Icon(Icons.lock),
-                      suffixIcon: Icon(Icons.visibility_off),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20.0),
+                    SizedBox(height: 20),
+
+                    // Navigate to Login
+                    GestureDetector(
+                      onTap: () => Get.to(() => LoginScreen()),
+                      child: RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          text: "Already a member? ",
+                          style: TextStyle(color: Colors.black54, fontSize: 14),
+                          children: [
+                            TextSpan(
+                              text: "SignIn",
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-
-                // Name Field
-                Container(
-                  width: Get.width,
-                  margin: EdgeInsets.all(20),
-                  child: TextFormField(
-                    controller: name,
-                    cursorColor: AppConstant.appMainColor,
-                    keyboardType: TextInputType.name,
-                    decoration: InputDecoration(
-                      hintText: 'Name',
-                      prefixIcon: Icon(Icons.person),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Phone Field
-                Container(
-                  width: Get.width,
-                  margin: EdgeInsets.all(20),
-                  child: TextFormField(
-                    controller: phone,
-                    cursorColor: AppConstant.appMainColor,
-                    keyboardType: TextInputType.phone,
-                    decoration: InputDecoration(
-                      hintText: 'Phone',
-                      prefixIcon: Icon(Icons.phone),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Forget Password
-                Container(
-                  alignment: Alignment.bottomRight,
-                  child: TextButton(
-                    onPressed: () {
-                      Get.snackbar("Reset Password", "Feature coming soon!");
-                    },
-                    child: Text("Forgot Password?"),
-                  ),
-                ),
-
-                // Register Button
-                Container(
-                  margin: EdgeInsets.only(bottom: 10),
-                  decoration: BoxDecoration(
-                    color: AppConstant.appMainbg,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  width: Get.width / 3.2,
-                  height: Get.height / 12,
-                  child: TextButton.icon(
-                    onPressed: () async {
-                      if (name.text.isEmpty || phone.text.isEmpty || email.text.isEmpty || password.text.isEmpty) {
-                        Get.snackbar(
-                          "Error",
-                          "Please fill all fields",
-                          backgroundColor: Colors.red,
-                          colorText: AppConstant.textcolor,
-                        );
-                      } else {
-                        try {
-                          UserCredential userCredential = await auth.createUserWithEmailAndPassword(
-                            email: email.text,
-                            password: password.text,
-                          );
-                          await db.collection('users').doc(userCredential.user!.uid).set({
-                            'uid': userCredential.user!.uid,
-                            'name': name.text,
-                            'email': email.text,
-                            'image': 'null',
-                            'isAdmin': false,
-                            'phone': phone.text,
-                          });
-                          Get.snackbar(
-                            "Success",
-                            "User Registered Successfully!",
-                            backgroundColor: Colors.green,
-                            colorText: AppConstant.textcolor,
-                          );
-                          Get.to(() => LoginScreen());
-                        } catch (e) {
-                          Get.snackbar(
-                            "Error",
-                            "Error: $e",
-                            backgroundColor: Colors.red,
-                            colorText: AppConstant.textcolor,
-                          );
-                        }
-                      }
-                    },
-                    icon: Icon(Icons.person_add, color: AppConstant.textcolor),
-                    label: Text(
-                      'Register',
-                      style: TextStyle(color: AppConstant.textcolor),
-                    ),
-                  ),
-                ),
-
-                // Navigate to Login
-                Container(
-                  alignment: Alignment.bottomLeft,
-                  child: TextButton(
-                    onPressed: () {
-                      Get.to(() => LoginScreen());
-                    },
-                    child: Text("Already have an account? Login"),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildTextField({required TextEditingController controller, required String hint, required IconData icon, bool obscure = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: TextField(
+        controller: controller,
+        obscureText: obscure,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.grey[300],
+          hintText: hint,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+          prefixIcon: Icon(icon, color: Colors.black54),
+        ),
+      ),
     );
   }
 }

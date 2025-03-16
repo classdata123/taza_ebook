@@ -1,12 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ebookapp/main.dart';
-import 'package:ebookapp/screen/auth-ui/register.dart';
-import 'package:ebookapp/utility/app_content.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:ebookapp/screen/auth-ui/register.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,142 +14,131 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
-
+  bool obscurePassword = true;
   FirebaseAuth auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
-    return KeyboardVisibilityBuilder(
-      builder: (context, visible) {
-        return Scaffold(
-          appBar: AppBar(
-            backgroundColor: AppConstant.appMainbg,
-            title: Text("Login"),
-          ),
-          body: SingleChildScrollView(
-            child: Column(
-              children: [
-                // Email Field
-                Container(
-                  width: Get.width,
-                  margin: EdgeInsets.all(20),
-                  child: TextFormField(
-                    controller: email,
-                    cursorColor: AppConstant.appMainColor,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      hintText: 'Email',
-                      prefixIcon: Icon(Icons.email),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                    ),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                "Login",
+                style: GoogleFonts.openSans(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 10),
+              Text(
+                "Please fill your details to login.",
+                style: GoogleFonts.openSans(
+                  fontSize: 14,
+                  color: Colors.black54,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 30),
+              TextField(
+                controller: email,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Color(0xFFDEDEDE),
+                  hintText: 'Username/email',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: BorderSide.none,
                   ),
                 ),
-
-                // Password Field
-                Container(
-                  width: Get.width,
-                  margin: EdgeInsets.all(20),
-                  child: TextFormField(
-                    controller: password,
-                    cursorColor: AppConstant.appMainColor,
-                    keyboardType: TextInputType.visiblePassword,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      hintText: 'Password',
-                      prefixIcon: Icon(Icons.lock),
-                      suffixIcon: Icon(Icons.visibility_off),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
+              ),
+              SizedBox(height: 15),
+              TextField(
+                controller: password,
+                obscureText: obscurePassword,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Color(0xFFDEDEDE),
+                  hintText: 'Password',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: BorderSide.none,
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      color: Colors.black,
                     ),
-                  ),
-                ),
-
-                // Login Button
-                Container(
-                  margin: EdgeInsets.only(bottom: 10),
-                  decoration: BoxDecoration(
-                    color: AppConstant.appMainbg,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  width: Get.width / 3.2,
-                  height: Get.height / 12,
-                  child: TextButton.icon(
-                    onPressed: () async {
-                      if (email.text.isEmpty || password.text.isEmpty) {
-                        Get.snackbar(
-                          "Error",
-                          "Please fill all fields",
-                          backgroundColor: Colors.red,
-                          colorText: AppConstant.textcolor,
-                        );
-                      } else {
-                        try {
-                          UserCredential userCredential = await auth.signInWithEmailAndPassword(
-                            email: email.text.trim(),
-                            password: password.text.trim(),
-                          );
-
-                          // Show success message
-                          Get.snackbar(
-                            "Success",
-                            "Login Successful!",
-                            backgroundColor: Colors.green,
-                            colorText: AppConstant.textcolor,
-                          );
-
-                          // Redirect to Main Page (fix applied)
-                          Get.offAll(() => MyApp());
-                        } on FirebaseAuthException catch (e) {
-                          String errorMessage = "Login failed!";
-                          if (e.code == 'user-not-found') {
-                            errorMessage = "No user found with this email.";
-                          } else if (e.code == 'wrong-password') {
-                            errorMessage = "Incorrect password!";
-                          } else if (e.code == 'invalid-email') {
-                            errorMessage = "Invalid email format!";
-                          }
-                          Get.snackbar(
-                            "Error",
-                            errorMessage,
-                            backgroundColor: Colors.red,
-                            colorText: AppConstant.textcolor,
-                          );
-                        } catch (e) {
-                          Get.snackbar(
-                            "Error",
-                            "Unexpected error: ${e.toString()}",
-                            backgroundColor: Colors.red,
-                            colorText: AppConstant.textcolor,
-                          );
-                        }
-                      }
-                    },
-                    icon: Icon(Icons.login, color: AppConstant.textcolor),
-                    label: Text(
-                      'Login',
-                      style: TextStyle(color: AppConstant.textcolor),
-                    ),
-                  ),
-                ),
-
-                // Navigate to Register
-                Container(
-                  alignment: Alignment.bottomLeft,
-                  child: TextButton(
                     onPressed: () {
-                      Get.to(() => RegisterScreen());
+                      setState(() {
+                        obscurePassword = !obscurePassword;
+                      });
                     },
-                    child: Text("Don't have an account? Register"),
                   ),
                 ),
-              ],
-            ),
+              ),
+              SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    minimumSize: Size(double.infinity, 50),
+                  ),
+                  onPressed: () async {
+                    // Login logic here
+                  },
+                  child: Text("Login", style: TextStyle(color: Colors.white)),
+                ),
+              ),
+              SizedBox(height: 10),
+              TextButton(
+                onPressed: () {},
+                child: Text(
+                  "Forgot password?",
+                  style: GoogleFonts.openSans(
+                    fontSize: 14,
+                    color: Colors.black,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              GestureDetector(
+                onTap: () => Get.to(() => RegisterScreen()),
+                child: RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    text: "Don't have an account? ",
+                    style: TextStyle(color: Colors.black54, fontSize: 14),
+                    children: [
+                      TextSpan(
+                        text: "Register",
+                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
