@@ -108,7 +108,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 'phone': phone.text,
                               });
                               Get.snackbar("Success", "User Registered Successfully!", backgroundColor: Colors.green, colorText: Colors.white);
-                              Get.to(() => LoginScreen());
+                                 // ✅ Navigate directly to Home Screen
+                                Get.offAllNamed("/home");
                             } catch (e) {
                               Get.snackbar("Error", "Error: $e", backgroundColor: Colors.red, colorText: Colors.white);
                             }

@@ -1,5 +1,7 @@
 import 'package:ebookapp/screen/auth-ui/splashscreen.dart';
 import 'package:ebookapp/screen/auth-ui/register.dart'; // Correct path
+import 'package:ebookapp/screen/auth-ui/login.dart';  // Added Login Screen
+import 'package:ebookapp/screen/home/home.dart';      // Added Home Screen
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -26,6 +28,8 @@ class MyApp extends StatelessWidget {
       home: SplashScreen(), // Start from splash
       getPages: [
         GetPage(name: "/register", page: () => RegisterScreen()),
+        GetPage(name: "/login", page: () => LoginScreen()), // ✅ Login Route
+        GetPage(name: "/home", page: () => HomeScreen()), 
       ],
     );
   }
