@@ -1,8 +1,11 @@
+import 'package:ebookapp/User/homescreen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:ebookapp/screen/auth-ui/register.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -57,6 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: 30),
               TextField(
                 controller: email,
+                keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Color(0xFFDEDEDE),
@@ -100,9 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     backgroundColor: Colors.black,
                     minimumSize: Size(double.infinity, 50),
                   ),
-                  onPressed: () async {
-                    // Login logic here
-                  },
+                  onPressed: loginUser, // Call the login function
                   child: Text("Login", style: TextStyle(color: Colors.white)),
                 ),
               ),
@@ -140,5 +142,37 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  // Login Function
+  void loginUser() async {
+    if (email.text.isEmpty || password.text.isEmpty) {
+      Get.snackbar("Error", "Please fill all fields",
+          backgroundColor: Colors.red, colorText: Colors.white);
+    } else {
+      try {
+        UserCredential userCredential = await auth.signInWithEmailAndPassword(
+          email: email.text.trim(),
+          password: password.text.trim(),
+        );
+
+        Get.snackbar("Success", "Login Successful!",
+            backgroundColor: Colors.green, colorText: Colors.white);
+
+        // Redirect to the main home page after login
+        Get.offAll(() => HomeScreen());
+      } on FirebaseAuthException catch (e) {
+        String errorMessage;
+        if (e.code == 'user-not-found') {
+          errorMessage = "No user found with this email.";
+        } else if (e.code == 'wrong-password') {
+          errorMessage = "Incorrect password. Please try again.";
+        } else {
+          errorMessage = "An error occurred: ${e.message}";
+        }
+        Get.snackbar("Login Failed", errorMessage,
+            backgroundColor: Colors.red, colorText: Colors.white);
+      }
+    }
   }
 }
