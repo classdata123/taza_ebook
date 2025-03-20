@@ -1,4 +1,4 @@
-import 'package:ebookapp/User/homescreen.dart';
+import 'package:ebookapp/User/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
@@ -160,7 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
             backgroundColor: Colors.green, colorText: Colors.white);
 
         // Redirect to the main home page after login
-        Get.offAll(() => HomeScreen());
+        Get.offAll(() => UserProfileScreen());
       } on FirebaseAuthException catch (e) {
         String errorMessage;
         if (e.code == 'user-not-found') {
