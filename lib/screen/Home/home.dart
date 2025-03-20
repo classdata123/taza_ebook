@@ -1,51 +1,107 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Happy Reading 📚"),
+        title: const Text("Book Store"),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
-            onPressed: () {
-              // Implement Search
-            },
+            onPressed: () {},
           ),
           IconButton(
             icon: const Icon(Icons.shopping_cart),
-            onPressed: () {
-              // Navigate to Cart Screen
-            },
+            onPressed: () {},
           ),
         ],
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Best Deals",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Categories
+            const Text("Categories", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: ["Fiction", "Science", "History", "Romance"].map((category) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: Chip(label: Text(category)),
+                  );
+                }).toList(),
               ),
-              SizedBox(
-                height: 150,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: _buildBestDeals(),
-                ),
+            ),
+            const SizedBox(height: 20),
+            
+            // New Arrivals
+            const Text("New Arrivals", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 180,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: 5,
+                itemBuilder: (context, index) {
+                  return Container(
+                    width: 120,
+                    margin: const EdgeInsets.symmetric(horizontal: 5),
+                    color: Colors.grey[300],
+                    child: const Center(child: Text("Book Cover")),
+                  );
+                },
               ),
-              const SizedBox(height: 10),
-              _buildBookSection("Top Books", _buildBookList()),
-              _buildBookSection("Latest Books", _buildBookList()),
-              _buildBookSection("Upcoming Books", _buildBookList()),
-            ],
-          ),
+            ),
+            const SizedBox(height: 20),
+            
+            // Bestsellers
+            const Text("Bestsellers", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 180,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: 5,
+                itemBuilder: (context, index) {
+                  return Container(
+                    width: 120,
+                    margin: const EdgeInsets.symmetric(horizontal: 5),
+                    color: Colors.grey[300],
+                    child: const Center(child: Text("Book Cover")),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
+            
+            // Top Books
+            const Text("Top Books", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 0.7,
+              ),
+              itemCount: 6,
+              itemBuilder: (context, index) {
+                return Container(
+                  color: Colors.grey[300],
+                  child: const Center(child: Text("Book Cover")),
+                );
+              },
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -54,59 +110,7 @@ class HomeScreen extends StatelessWidget {
           BottomNavigationBarItem(icon: Icon(Icons.category), label: "Categories"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Account"),
         ],
-        onTap: (index) {
-          // Handle navigation
-        },
       ),
     );
-  }
-
-  // Best Deals - Horizontal Cards
-  List<Widget> _buildBestDeals() {
-    return List.generate(5, (index) {
-      return Card(
-        child: SizedBox(
-          width: 120,
-          child: Column(
-            children: [
-              Image.network("https://via.placeholder.com/100", height: 80),
-              const Text("Book Title", style: TextStyle(fontWeight: FontWeight.bold)),
-              const Text("\$25.00", style: TextStyle(color: Colors.green)),
-            ],
-          ),
-        ),
-      );
-    });
-  }
-
-  // Book List Section
-  Widget _buildBookSection(String title, List<Widget> books) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        Column(children: books),
-        const SizedBox(height: 10),
-      ],
-    );
-  }
-
-  // Books - Vertical Cards
-  List<Widget> _buildBookList() {
-    return List.generate(3, (index) {
-      return Card(
-        child: ListTile(
-          leading: Image.network("https://via.placeholder.com/50"),
-          title: const Text("Book Name"),
-          subtitle: const Text("\$20.00"),
-          trailing: IconButton(
-            icon: const Icon(Icons.arrow_forward),
-            onPressed: () {
-              // Navigate to Book Details Screen
-            },
-          ),
-        ),
-      );
-    });
   }
 }
