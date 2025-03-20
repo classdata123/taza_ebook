@@ -1,3 +1,4 @@
+import 'package:ebookapp/screen/admin-panel/category.dart';
 import 'package:ebookapp/screen/admin-panel/drawer.dart';
 import 'package:ebookapp/utility/app_content.dart';
 import 'package:flutter/material.dart';
@@ -13,11 +14,26 @@ class Admin extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(backgroundColor: AppConstant.appMainColor),
-
-      drawer: Draw(), // Ensure this matches the class name in drawer.dart
+      drawer: Draw(),
       body: Center(
-        child: Text("Admin Panel"),
-      ), // Added a body for better display
+        child: Column(
+          mainAxisAlignment:
+              MainAxisAlignment.center, // Aligns content in center
+          children: [
+            Text("Admin Panel"),
+            SizedBox(height: 20), // Adds spacing
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CategoryPage()),
+                );
+              },
+              child: Text("Go to Category Page"),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
