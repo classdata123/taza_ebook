@@ -1,8 +1,14 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ebookapp/screen/admin-panel/drawer.dart';
 import 'package:ebookapp/utility/app_content.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart'; // Import GetX
+import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart'; // Import GetX
 
 class CategoryPage extends StatefulWidget {
   const CategoryPage({super.key});
@@ -14,7 +20,54 @@ class CategoryPage extends StatefulWidget {
 class _CategoryPageState extends State<CategoryPage> {
   final db = FirebaseFirestore.instance;
   String? updated;
+         String? base64Image;
   TextEditingController bookname = TextEditingController();
+ Future<void> pickimage(ImageSource source) async {
+     final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: source);
+
+    if (image != null) {
+      // Handle web platform
+      if (kIsWeb) {
+        Uint8List webImage = await image.readAsBytes();
+     
+
+     
+        String base64String = base64Encode(webImage);
+        setState(() {
+          base64Image = base64String; // Store the base64 string
+        });
+
+        // Show success message for web
+        // Get.snackbar("Success", 'Image picked',
+        //   backgroundColor: const Color.fromARGB(255, 8, 0, 8),
+        //   colorText: Appconstant.textcolor,
+        //   snackPosition: SnackPosition.BOTTOM
+        // );
+
+      } else {
+        // Handle mobile platform
+        File mobileImage = File(image.path);
+        print("Mobile Image Picked: ${mobileImage.path}");
+
+        // Convert the mobile image to base64
+        final bytes = await mobileImage.readAsBytes();
+        String base64String = base64Encode(bytes);
+
+        setState(() {
+          base64Image = base64String; // Store the base64 string
+        });
+
+        // Show success message for mobile
+        // Get.snackbar("Success", 'Image picked',
+        //   backgroundColor: const Color.fromARGB(255, 7, 0, 8),
+        //   colorText: Appconstant.textcolor,
+        //   snackPosition: SnackPosition.BOTTOM
+        // );
+      }
+    } else {
+      print("No image picked.");
+    }}
 
   @override
   Widget build(BuildContext context) {
@@ -25,13 +78,21 @@ class _CategoryPageState extends State<CategoryPage> {
         child: Column(
           children: [
             TextField(controller: bookname),
+               Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: ElevatedButton(
+                onPressed: () => pickimage(ImageSource.gallery),
+                child: Text('Pick Image'),
+              ),
+            ),
             ElevatedButton(
               onPressed: () async {
                 if (bookname.text.isNotEmpty) {
                   if (updated == null) {
                     try {
                       await db.collection('category').add({
-                        'bookname': bookname.text, // Fixed typo
+                        'bokname': bookname.text, 
+                        'img_pick':base64Image// Fixed typo
                       });
                       setState(() {});
                       Get.snackbar(
@@ -70,7 +131,7 @@ class _CategoryPageState extends State<CategoryPage> {
                             ListTile(
                               textColor: AppConstant.snacktext,
                               tileColor: AppConstant.appMainColor,
-                              title: Text(data['bookname']), // Fixed key
+                              title: Text(data['bokname']), // Fixed key
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
