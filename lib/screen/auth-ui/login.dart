@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ebookapp/User/profile_screen.dart';
 import 'package:ebookapp/utility/app_content.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:lottie/lottie.dart'; // Lottie for animations
 
 import '../home/home.dart';
 import 'register.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -150,5 +152,37 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  // Login Function
+  void loginUser() async {
+    if (email.text.isEmpty || password.text.isEmpty) {
+      Get.snackbar("Error", "Please fill all fields",
+          backgroundColor: Colors.red, colorText: Colors.white);
+    } else {
+      try {
+        UserCredential userCredential = await auth.signInWithEmailAndPassword(
+          email: email.text.trim(),
+          password: password.text.trim(),
+        );
+
+        Get.snackbar("Success", "Login Successful!",
+            backgroundColor: Colors.green, colorText: Colors.white);
+
+        // Redirect to the main home page after login
+        Get.offAll(() => UserProfileScreen());
+      } on FirebaseAuthException catch (e) {
+        String errorMessage;
+        if (e.code == 'user-not-found') {
+          errorMessage = "No user found with this email.";
+        } else if (e.code == 'wrong-password') {
+          errorMessage = "Incorrect password. Please try again.";
+        } else {
+          errorMessage = "An error occurred: ${e.message}";
+        }
+        Get.snackbar("Login Failed", errorMessage,
+            backgroundColor: Colors.red, colorText: Colors.white);
+      }
+    }
   }
 }

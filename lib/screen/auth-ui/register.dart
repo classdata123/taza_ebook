@@ -76,8 +76,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     // Password Field
                     _buildTextField(controller: password, hint: "Password", icon: Icons.lock, obscure: true),
 
-                    // Confirm Password Field
-                    _buildTextField(controller: phone, hint: "Confirm Password", icon: Icons.lock, obscure: true),
+                    // Phone Field
+                    _buildTextField(controller: phone, hint: "Phone", icon: Icons.phone_callback, obscure: true),
 
                     SizedBox(height: 12), // Adjusted space
 
