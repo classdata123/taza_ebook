@@ -1,182 +1,181 @@
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ebookapp/screen/admin-panel/drawer.dart';
-import 'package:ebookapp/utility/app_content.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart'; // Import GetX
 
 class CategoryPage extends StatefulWidget {
-  const CategoryPage({super.key});
-
   @override
-  State<CategoryPage> createState() => _CategoryPageState();
+  _CategoryPage createState() => _CategoryPage();
 }
 
-class _CategoryPageState extends State<CategoryPage> {
-  final db = FirebaseFirestore.instance;
-  String? updated;
-         String? base64Image;
+class _CategoryPage extends State<CategoryPage> {
+  final FirebaseFirestore db = FirebaseFirestore.instance;
+  String? base64Image;
   TextEditingController bookname = TextEditingController();
- Future<void> pickimage(ImageSource source) async {
-     final ImagePicker picker = ImagePicker();
+  TextEditingController price = TextEditingController();
+  TextEditingController description = TextEditingController();
+  TextEditingController category = TextEditingController();
+
+  Future<void> pickImage(ImageSource source) async {
+    final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: source);
 
     if (image != null) {
-      // Handle web platform
-      if (kIsWeb) {
-        Uint8List webImage = await image.readAsBytes();
-     
+      Uint8List imageBytes = await image.readAsBytes();
+      setState(() {
+        base64Image = base64Encode(imageBytes);
+      });
+    }
+  }
 
-     
-        String base64String = base64Encode(webImage);
-        setState(() {
-          base64Image = base64String; // Store the base64 string
-        });
+  Future<void> deleteBook(String docId) async {
+    await db.collection('books').doc(docId).delete();
+    Get.snackbar(
+      "Success",
+      "Book Deleted Successfully",
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
+  }
 
-        // Show success message for web
-        // Get.snackbar("Success", 'Image picked',
-        //   backgroundColor: const Color.fromARGB(255, 8, 0, 8),
-        //   colorText: Appconstant.textcolor,
-        //   snackPosition: SnackPosition.BOTTOM
-        // );
-
-      } else {
-        // Handle mobile platform
-        File mobileImage = File(image.path);
-        print("Mobile Image Picked: ${mobileImage.path}");
-
-        // Convert the mobile image to base64
-        final bytes = await mobileImage.readAsBytes();
-        String base64String = base64Encode(bytes);
-
-        setState(() {
-          base64Image = base64String; // Store the base64 string
-        });
-
-        // Show success message for mobile
-        // Get.snackbar("Success", 'Image picked',
-        //   backgroundColor: const Color.fromARGB(255, 7, 0, 8),
-        //   colorText: Appconstant.textcolor,
-        //   snackPosition: SnackPosition.BOTTOM
-        // );
-      }
-    } else {
-      print("No image picked.");
-    }}
+  Future<void> updateBook(String docId) async {
+    await db.collection('books').doc(docId).update({
+      'name': bookname.text,
+      'price': price.text,
+      'description': description.text,
+      'category': category.text,
+      'image': base64Image,
+    });
+    Get.snackbar(
+      "Success",
+      "Book Updated Successfully",
+      backgroundColor: Colors.blue,
+      colorText: Colors.white,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: AppConstant.appMainColor),
-      drawer: Draw(),
-      body: Center(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: Text("Add Book", style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.black,
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(20),
         child: Column(
           children: [
-            TextField(controller: bookname),
-               Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: ElevatedButton(
-                onPressed: () => pickimage(ImageSource.gallery),
-                child: Text('Pick Image'),
-              ),
-            ),
+            _buildTextField(bookname, "Book Name"),
+            _buildTextField(price, "Price"),
+            _buildTextField(description, "Description"),
+            _buildTextField(category, "Category"),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+              onPressed: () => pickImage(ImageSource.gallery),
+              child: Text("Pick Image", style: TextStyle(color: Colors.white)),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
               onPressed: () async {
-                if (bookname.text.isNotEmpty) {
-                  if (updated == null) {
-                    try {
-                      await db.collection('category').add({
-                        'bokname': bookname.text, 
-                        'img_pick':base64Image// Fixed typo
-                      });
-                      setState(() {});
-                      Get.snackbar(
-                        'Success',
-                        'Inserted successfully!',
-                        backgroundColor: AppConstant.appMainColor,
-                        colorText: Colors.white,
-                      );
-                    } catch (e) {
-                      Get.snackbar(
-                        'Error',
-                        'Insertion failed!',
-                        backgroundColor: AppConstant.appMainColor,
-                        colorText: const Color.fromARGB(255, 232, 99, 89),
-                      );
-                    }
-                  }
+                try {
+                  DocumentReference docRef = await db.collection('books').add({
+                    'Bookname': bookname.text,
+                    'price': price.text,
+                    'description': description.text,
+                    'category': category.text,
+                    'image': base64Image,
+                  });
+                  Get.snackbar(
+                    "Success",
+                    "Book Added Successfully",
+                    backgroundColor: Colors.green,
+                    colorText: Colors.white,
+                  );
+                } catch (e) {
+                  Get.snackbar(
+                    "Error",
+                    "Failed to add book: $e",
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
                 }
               },
-              child: Text("Add Book"),
+              child: Text("Add Book", style: TextStyle(color: Colors.white)),
             ),
+            SizedBox(height: 20),
             Expanded(
               child: StreamBuilder(
-                stream: db.collection('category').snapshots(),
-                builder: (context, snapshot) {
+                stream: db.collection('books').snapshots(),
+                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (!snapshot.hasData) {
                     return Center(child: CircularProgressIndicator());
-                  } else {
-                    var document = snapshot.data!.docs;
-                    return ListView.builder(
-                      itemCount: document.length,
-                      itemBuilder: (context, index) {
-                        var data = document[index].data();
-                        return Column(
-                          children: [
-                            ListTile(
-                              textColor: AppConstant.snacktext,
-                              tileColor: AppConstant.appMainColor,
-                              title: Text(data['bokname']), // Fixed key
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.delete,
-                                      color: Colors.white,
-                                    ),
-                                    onPressed: () async {
-                                      try {
-                                        await db
-                                            .collection('category')
-                                            .doc(document[index].id)
-                                            .delete();
-                                        setState(() {});
-                                        Get.snackbar(
-                                          'Success',
-                                          'Deleted successfully!',
-                                          backgroundColor:
-                                              AppConstant.appMainColor,
-                                          colorText: Colors.white,
-                                        );
-                                      } catch (e) {
-                                        Get.snackbar(
-                                          'Error',
-                                          'Error: $e', // Fixed string interpolation
-                                          backgroundColor:
-                                              AppConstant.appMainColor,
-                                          colorText: Colors.white,
-                                        );
-                                      }
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    );
                   }
+                  return ListView(
+                    children:
+                        snapshot.data!.docs.map((doc) {
+                          return ListTile(
+                            title: Text(
+                              doc['Bookname'],
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            subtitle: Text(
+                              "${doc['price']} - ${doc['description']} - ${doc['category']}",
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.edit, color: Colors.blue),
+                                  onPressed: () {
+                                    bookname.text = doc['Bookname'];
+                                    price.text = doc['price'];
+                                    description.text = doc['description'];
+                                    category.text = doc['category'];
+                                    base64Image = doc['image'];
+                                    updateBook(doc.id);
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () => deleteBook(doc.id),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                  );
                 },
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String hint) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 10),
+      child: TextField(
+        controller: controller,
+        style: TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.grey[900],
+          hintText: hint,
+          hintStyle: TextStyle(color: Colors.white54),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide.none,
+          ),
         ),
       ),
     );

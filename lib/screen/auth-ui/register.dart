@@ -41,7 +41,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
           body: Center(
             child: SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5), // Reduced vertical padding
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 5,
+                ), // Reduced vertical padding
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -49,14 +52,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     // Lottie Animation (Reduced space above, increased size)
                     SizedBox(
                       height: 150, // Increased size
-                      child: Lottie.asset('assets/image/logo.json'), 
+                      child: Lottie.asset('assets/image/logo.json'),
                     ),
 
                     SizedBox(height: 2), // Further reduced space
 
                     Text(
                       "Register",
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: 8), // Reduced spacing
@@ -66,21 +73,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: 12), // Reduced spacing
-
                     // Name Field
-                    _buildTextField(controller: name, hint: "Username", icon: Icons.person),
-                    
+                    _buildTextField(
+                      controller: name,
+                      hint: "Username",
+                      icon: Icons.person,
+                    ),
+
                     // Email Field
-                    _buildTextField(controller: email, hint: "Email", icon: Icons.email),
+                    _buildTextField(
+                      controller: email,
+                      hint: "Email",
+                      icon: Icons.email,
+                    ),
 
                     // Password Field
-                    _buildTextField(controller: password, hint: "Password", icon: Icons.lock, obscure: true),
+                    _buildTextField(
+                      controller: password,
+                      hint: "Password",
+                      icon: Icons.lock,
+                      obscure: true,
+                    ),
 
                     // Phone Field
-                    _buildTextField(controller: phone, hint: "Phone", icon: Icons.phone_callback, obscure: true),
+                    _buildTextField(
+                      controller: phone,
+                      hint: "Phone",
+                      icon: Icons.phone_callback,
+                      obscure: true,
+                    ),
 
                     SizedBox(height: 12), // Adjusted space
-
                     // Register Button
                     SizedBox(
                       width: double.infinity,
@@ -88,39 +111,65 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                         onPressed: () async {
-                          if (name.text.isEmpty || phone.text.isEmpty || email.text.isEmpty || password.text.isEmpty) {
-                            Get.snackbar("Error", "Please fill all fields", backgroundColor: Colors.red, colorText: Colors.white);
+                          if (name.text.isEmpty ||
+                              phone.text.isEmpty ||
+                              email.text.isEmpty ||
+                              password.text.isEmpty) {
+                            Get.snackbar(
+                              "Error",
+                              "Please fill all fields",
+                              backgroundColor: Colors.red,
+                              colorText: Colors.white,
+                            );
                           } else {
                             try {
-                              UserCredential userCredential = await auth.createUserWithEmailAndPassword(
-                                email: email.text,
-                                password: password.text,
+                              UserCredential userCredential = await auth
+                                  .createUserWithEmailAndPassword(
+                                    email: email.text,
+                                    password: password.text,
+                                  );
+                              await db
+                                  .collection('users')
+                                  .doc(userCredential.user!.uid)
+                                  .set({
+                                    'uid': userCredential.user!.uid,
+                                    'name': name.text,
+                                    'email': email.text,
+                                    'image': 'null',
+                                    'isAdmin': false,
+                                    'phone': phone.text,
+                                  });
+                              Get.snackbar(
+                                "Success",
+                                "User Registered Successfully!",
+                                backgroundColor: Colors.green,
+                                colorText: Colors.white,
                               );
-                              await db.collection('users').doc(userCredential.user!.uid).set({
-                                'uid': userCredential.user!.uid,
-                                'name': name.text,
-                                'email': email.text,
-                                'image': 'null',
-                                'isAdmin': false,
-                                'phone': phone.text,
-                              });
-                              Get.snackbar("Success", "User Registered Successfully!", backgroundColor: Colors.green, colorText: Colors.white);
-                                 // ✅ Navigate directly to Home Screen
-                                Get.offAllNamed("/home");
+                              // ✅ Navigate directly to Home Screen
+                              Get.offAllNamed("/home");
                             } catch (e) {
-                              Get.snackbar("Error", "Error: $e", backgroundColor: Colors.red, colorText: Colors.white);
+                              Get.snackbar(
+                                "Error",
+                                "Error: $e",
+                                backgroundColor: Colors.red,
+                                colorText: Colors.white,
+                              );
                             }
                           }
                         },
-                        child: Text("Register", style: TextStyle(color: Colors.white, fontSize: 16)),
+                        child: Text(
+                          "Register",
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
                       ),
                     ),
 
                     SizedBox(height: 12), // Adjusted space
-
                     // Navigate to Login
                     GestureDetector(
                       onTap: () => Get.to(() => LoginScreen()),
@@ -132,7 +181,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           children: [
                             TextSpan(
                               text: "Sign In",
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
                             ),
                           ],
                         ),
@@ -148,7 +200,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildTextField({required TextEditingController controller, required String hint, required IconData icon, bool obscure = false}) {
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    bool obscure = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8), // Slightly reduced spacing
       child: TextField(
@@ -158,7 +215,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
           filled: true,
           fillColor: Colors.grey[300],
           hintText: hint,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide.none,
+          ),
           prefixIcon: Icon(icon, color: Colors.black54),
         ),
       ),
