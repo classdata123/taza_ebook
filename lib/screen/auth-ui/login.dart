@@ -10,7 +10,6 @@ import 'package:lottie/lottie.dart'; // Lottie for animations
 import '../home/home.dart';
 import 'register.dart';
 
-
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -73,6 +72,18 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Password Field
                     _buildTextField(controller: password, hint: "Password", icon: Icons.lock, obscure: true),
 
+                    // Forgot Password Button
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () => resetPassword(),
+                        child: Text(
+                          "Forgot Password?",
+                          style: TextStyle(color: Colors.black),
+                        ),
+                      ),
+                    ),
+
                     SizedBox(height: 12),
 
                     // Login Button
@@ -93,12 +104,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                 email: email.text,
                                 password: password.text,
                               );
-                              
+
                               Get.snackbar("Success", "Login Successful!", backgroundColor: Colors.green, colorText: Colors.white);
-                              
+
                               // ✅ Redirect to Home Screen
                               Get.offAll(() => HomeScreen());
-                              
                             } catch (e) {
                               Get.snackbar("Error", "Invalid email or password", backgroundColor: Colors.red, colorText: Colors.white);
                             }
@@ -154,35 +164,21 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // Login Function
-  void loginUser() async {
-    if (email.text.isEmpty || password.text.isEmpty) {
-      Get.snackbar("Error", "Please fill all fields",
+  // 🔹 Function to reset password via email
+  void resetPassword() async {
+    if (email.text.isEmpty) {
+      Get.snackbar("Error", "Please enter your email to reset password",
           backgroundColor: Colors.red, colorText: Colors.white);
-    } else {
-      try {
-        UserCredential userCredential = await auth.signInWithEmailAndPassword(
-          email: email.text.trim(),
-          password: password.text.trim(),
-        );
+      return;
+    }
 
-        Get.snackbar("Success", "Login Successful!",
-            backgroundColor: Colors.green, colorText: Colors.white);
-
-        // Redirect to the main home page after login
-        Get.offAll(() => UserProfileScreen());
-      } on FirebaseAuthException catch (e) {
-        String errorMessage;
-        if (e.code == 'user-not-found') {
-          errorMessage = "No user found with this email.";
-        } else if (e.code == 'wrong-password') {
-          errorMessage = "Incorrect password. Please try again.";
-        } else {
-          errorMessage = "An error occurred: ${e.message}";
-        }
-        Get.snackbar("Login Failed", errorMessage,
-            backgroundColor: Colors.red, colorText: Colors.white);
-      }
+    try {
+      await auth.sendPasswordResetEmail(email: email.text.trim());
+      Get.snackbar("Success", "Password reset email sent!",
+          backgroundColor: Colors.green, colorText: Colors.white);
+    } catch (e) {
+      Get.snackbar("Error", "Failed to send reset email. Please try again.",
+          backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
 }
