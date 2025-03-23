@@ -1,8 +1,15 @@
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ebookapp/User/profile_screen.dart';
+import 'package:ebookapp/utility/app_content.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:ebookapp/screen/auth-ui/register.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:get/get.dart';
+import 'package:lottie/lottie.dart'; // Lottie for animations
+
+import '../home/home.dart';
+import 'register.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,131 +21,168 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
-  bool obscurePassword = true;
+
   FirebaseAuth auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                "Login",
-                style: GoogleFonts.openSans(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 10),
-              Text(
-                "Please fill your details to login.",
-                style: GoogleFonts.openSans(
-                  fontSize: 14,
-                  color: Colors.black54,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 30),
-              TextField(
-                controller: email,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Color(0xFFDEDEDE),
-                  hintText: 'Username/email',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5.0),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              SizedBox(height: 15),
-              TextField(
-                controller: password,
-                obscureText: obscurePassword,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Color(0xFFDEDEDE),
-                  hintText: 'Password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5.0),
-                    borderSide: BorderSide.none,
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      obscurePassword ? Icons.visibility_off : Icons.visibility,
-                      color: Colors.black,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        obscurePassword = !obscurePassword;
-                      });
-                    },
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    minimumSize: Size(double.infinity, 50),
-                  ),
-                  onPressed: () async {
-                    // Login logic here
-                  },
-                  child: Text("Login", style: TextStyle(color: Colors.white)),
-                ),
-              ),
-              SizedBox(height: 10),
-              TextButton(
-                onPressed: () {},
-                child: Text(
-                  "Forgot password?",
-                  style: GoogleFonts.openSans(
-                    fontSize: 14,
-                    color: Colors.black,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              GestureDetector(
-                onTap: () => Get.to(() => RegisterScreen()),
-                child: RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                    text: "Don't have an account? ",
-                    style: TextStyle(color: Colors.black54, fontSize: 14),
-                    children: [
-                      TextSpan(
-                        text: "Register",
-                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+    return KeyboardVisibilityBuilder(
+      builder: (context, visible) {
+        return Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () => Get.back(),
+            ),
           ),
+          body: Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Lottie Animation
+                    SizedBox(
+                      height: 150,
+                      child: Lottie.asset('assets/image/logo.json'),
+                    ),
+
+                    SizedBox(height: 8),
+
+                    Text(
+                      "Login",
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      "Please enter your credentials.",
+                      style: TextStyle(fontSize: 16, color: Colors.black54),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 12),
+
+                    // Email Field
+                    _buildTextField(controller: email, hint: "Email", icon: Icons.email),
+
+                    // Password Field
+                    _buildTextField(controller: password, hint: "Password", icon: Icons.lock, obscure: true),
+
+                    SizedBox(height: 12),
+
+                    // Login Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        onPressed: () async {
+                          if (email.text.isEmpty || password.text.isEmpty) {
+                            Get.snackbar("Error", "Please fill all fields", backgroundColor: Colors.red, colorText: Colors.white);
+                          } else {
+                            try {
+                              UserCredential userCredential = await auth.signInWithEmailAndPassword(
+                                email: email.text,
+                                password: password.text,
+                              );
+                              
+                              Get.snackbar("Success", "Login Successful!", backgroundColor: Colors.green, colorText: Colors.white);
+                              
+                              // ✅ Redirect to Home Screen
+                              Get.offAll(() => HomeScreen());
+                              
+                            } catch (e) {
+                              Get.snackbar("Error", "Invalid email or password", backgroundColor: Colors.red, colorText: Colors.white);
+                            }
+                          }
+                        },
+                        child: Text("Login", style: TextStyle(color: Colors.white, fontSize: 16)),
+                      ),
+                    ),
+
+                    SizedBox(height: 12),
+
+                    // Navigate to Register
+                    GestureDetector(
+                      onTap: () => Get.to(() => RegisterScreen()),
+                      child: RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          text: "Don't have an account? ",
+                          style: TextStyle(color: Colors.black54, fontSize: 14),
+                          children: [
+                            TextSpan(
+                              text: "Sign Up",
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTextField({required TextEditingController controller, required String hint, required IconData icon, bool obscure = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: TextField(
+        controller: controller,
+        obscureText: obscure,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.grey[300],
+          hintText: hint,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+          prefixIcon: Icon(icon, color: Colors.black54),
         ),
       ),
     );
+  }
+
+  // Login Function
+  void loginUser() async {
+    if (email.text.isEmpty || password.text.isEmpty) {
+      Get.snackbar("Error", "Please fill all fields",
+          backgroundColor: Colors.red, colorText: Colors.white);
+    } else {
+      try {
+        UserCredential userCredential = await auth.signInWithEmailAndPassword(
+          email: email.text.trim(),
+          password: password.text.trim(),
+        );
+
+        Get.snackbar("Success", "Login Successful!",
+            backgroundColor: Colors.green, colorText: Colors.white);
+
+        // Redirect to the main home page after login
+        Get.offAll(() => UserProfileScreen());
+      } on FirebaseAuthException catch (e) {
+        String errorMessage;
+        if (e.code == 'user-not-found') {
+          errorMessage = "No user found with this email.";
+        } else if (e.code == 'wrong-password') {
+          errorMessage = "Incorrect password. Please try again.";
+        } else {
+          errorMessage = "An error occurred: ${e.message}";
+        }
+        Get.snackbar("Login Failed", errorMessage,
+            backgroundColor: Colors.red, colorText: Colors.white);
+      }
+    }
   }
 }
