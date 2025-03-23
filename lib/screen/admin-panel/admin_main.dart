@@ -1,10 +1,10 @@
+import 'package:ebookapp/component/base_scaffold.dart';
 import 'package:ebookapp/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-
 import 'package:ebookapp/screen/admin-panel/category.dart';
-import 'package:ebookapp/screen/admin-panel/drawer.dart';
 import 'package:ebookapp/utility/app_content.dart';
+import 'package:ebookapp/screen/admin-panel/Product.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,14 +12,23 @@ void main() async {
   runApp(MaterialApp(home: Admin()));
 }
 
-class Admin extends StatelessWidget {
+class Admin extends StatefulWidget {
+  // Changed to StatefulWidget
   const Admin({super.key});
 
   @override
+  State<Admin> createState() => _AdminState();
+}
+
+class _AdminState extends State<Admin> {
+  final GlobalKey<ScaffoldState> _scaffoldKey =
+      GlobalKey<ScaffoldState>(); // Add scaffold key
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(backgroundColor: AppConstant.appMainColor),
-      drawer: Draw(), // Ensure class Draw exists in drawer.dart
+    return BaseScaffold(
+      title: "",
+      key: _scaffoldKey, // Add the key to Scaffold      
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -41,3 +50,4 @@ class Admin extends StatelessWidget {
     );
   }
 }
+
