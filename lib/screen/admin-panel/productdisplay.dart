@@ -53,11 +53,7 @@ class _BookDisplayPageState extends State<BookDisplayPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Image.memory(
-                            base64Decode(doc['image']),
-                              height: 150,
-                              fit: BoxFit.cover,
-                            ),
+                            _decodeBase64Image(doc['image']),
                             SizedBox(height: 10),
                             Text(
                               "Name: ${doc['Bookname']}",
@@ -114,3 +110,20 @@ class _BookDisplayPageState extends State<BookDisplayPage> {
     );
   }
 }
+
+Widget _decodeBase64Image(String base64Image) {
+    try {
+      Uint8List bytes = base64Decode(base64Image);
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Image.memory(
+          bytes,
+          fit: BoxFit.cover,
+          width: 100,
+          height: 100,
+        ),
+      );
+    } catch (e) {
+      return Icon(Icons.broken_image, size: 100, color: Colors.redAccent);
+    }
+  }
