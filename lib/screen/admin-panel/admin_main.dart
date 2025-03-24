@@ -42,7 +42,7 @@ class Admin extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AdminDashboard()),
+                  MaterialPageRoute(builder: (context) => BookDisplayPage()),
                 );
               },
               child: Text("Go to Category show"),
@@ -59,6 +59,17 @@ class Admin extends StatelessWidget {
               },
               child: Text("Go users"),
             ),
+
+             ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AdminDashboard()),
+                );
+              },
+              child: Text("Go to admin dash show"),
+            ),
+
           ],
         ),
       ),

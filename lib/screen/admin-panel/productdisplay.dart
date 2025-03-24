@@ -10,12 +10,8 @@ class BookDisplayPage extends StatefulWidget {
 }
 
 class _BookDisplayPageState extends State<BookDisplayPage> {
-  final FirebaseFirestore db = FirebaseFirestore.instance;
-  TextEditingController bookname = TextEditingController();
-  TextEditingController price = TextEditingController();
-  TextEditingController description = TextEditingController();
-  TextEditingController category = TextEditingController();
-  String? base64Image;
+  final db = FirebaseFirestore.instance;
+
 
   Future<void> deleteBook(String docId) async {
     await db.collection('books').doc(docId).delete();
@@ -27,21 +23,7 @@ class _BookDisplayPageState extends State<BookDisplayPage> {
     );
   }
 
-  Future<void> updateBook(String docId) async {
-    await db.collection('books').doc(docId).update({
-      'Bookname': bookname.text,
-      'price': price.text,
-      'description': description.text,
-      'category': category.text,
-      'image': base64Image,
-    });
-    Get.snackbar(
-      "Success",
-      "Book Updated Successfully",
-      backgroundColor: Colors.blue,
-      colorText: Colors.white,
-    );
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +44,7 @@ class _BookDisplayPageState extends State<BookDisplayPage> {
             return ListView(
               children:
                   snapshot.data!.docs.map((doc) {
-                    Uint8List? imageBytes = base64Decode(doc['image']);
+                    // Uint8List? imageBytes = base64Decode(doc['image']);
                     return Card(
                       color: Colors.grey[900],
                       margin: EdgeInsets.symmetric(vertical: 8),
@@ -72,7 +54,7 @@ class _BookDisplayPageState extends State<BookDisplayPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Image.memory(
-                              imageBytes,
+                            base64Decode(doc['image']),
                               height: 150,
                               fit: BoxFit.cover,
                             ),
@@ -111,12 +93,7 @@ class _BookDisplayPageState extends State<BookDisplayPage> {
                                 IconButton(
                                   icon: Icon(Icons.edit, color: Colors.blue),
                                   onPressed: () {
-                                    bookname.text = doc['Bookname'];
-                                    price.text = doc['price'];
-                                    description.text = doc['description'];
-                                    category.text = doc['category'];
-                                    base64Image = doc['image'];
-                                    updateBook(doc.id);
+                                  
                                   },
                                 ),
                                 IconButton(
