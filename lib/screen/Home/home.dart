@@ -14,7 +14,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _screens = [
     const HomeScreenContent(), // Extract your home content into a separate widget
-    const CategoriesScreen(),  // Placeholder for categories
+    // const CategoriesScreen(),  // Placeholder for categories
     UserProfileScreen(), // User Profile Screen
   ];
 
@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.category), label: "Categories"),
+          // BottomNavigationBarItem(icon: Icon(Icons.category), label: "Categories"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Account"),
         ],
       ),
