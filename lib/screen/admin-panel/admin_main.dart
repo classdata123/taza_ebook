@@ -1,5 +1,8 @@
 import 'package:ebookapp/component/base_scaffold.dart';
 import 'package:ebookapp/firebase_options.dart';
+import 'package:ebookapp/screen/admin-panel/admindashboard.dart';
+import 'package:ebookapp/screen/admin-panel/productdisplay.dart';
+import 'package:ebookapp/screen/admin-panel/userdetail.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:ebookapp/screen/admin-panel/category.dart';
@@ -44,6 +47,38 @@ class _AdminState extends State<Admin> {
               },
               child: Text("Go to Category Page"),
             ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => BookDisplayPage()),
+                );
+              },
+              child: Text("Go to Category show"),
+            ),
+
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AdminUsersDashboard(),
+                  ),
+                );
+              },
+              child: Text("Go users"),
+            ),
+
+             ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AdminDashboard()),
+                );
+              },
+              child: Text("Go to admin dash show"),
+            ),
+
           ],
         ),
       ),
