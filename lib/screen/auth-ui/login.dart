@@ -108,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               Get.snackbar("Success", "Login Successful!", backgroundColor: Colors.green, colorText: Colors.white);
 
                               // ✅ Redirect to Home Screen
-                              Get.offAll(() => HomeScreen());
+                              Get.offAll(() => HomeScreenContent());
                             } catch (e) {
                               Get.snackbar("Error", "Invalid email or password", backgroundColor: Colors.red, colorText: Colors.white);
                             }
