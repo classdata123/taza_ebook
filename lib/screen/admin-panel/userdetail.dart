@@ -119,10 +119,10 @@ class _AdminUsersDashboardState extends State<AdminUsersDashboard> {
                 "Phone: ${user['phone']}",
                 style: TextStyle(color: Colors.white),
               ),
-              Text(
-                "Joined: ${user['registration_date']}",
-                style: TextStyle(color: Colors.white),
-              ),
+              // Text(
+              //   // "Joined: ${user['registration_date']}",
+              //   // style: TextStyle(color: Colors.white),
+              // ),
             ],
           ),
           actions: [
