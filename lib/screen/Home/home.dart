@@ -3,6 +3,8 @@ import 'package:ebookapp/screen/Home/Book_details.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ebookapp/User/profile_screen.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 
 class HomeScreenContent extends StatefulWidget {
   const HomeScreenContent({super.key});
@@ -18,7 +20,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
     setState(() {
       _selectedIndex = index;
     });
-    if (index == 2) { 
+    if (index == 2) {
       Get.to(() => UserProfileScreen());
     }
   }
@@ -125,7 +127,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
     String category = book['category'] ?? 'N/A';
     double rating = double.tryParse(book['rating'].toString()) ?? 0.0;
     String price = book['price'] ?? '0';
-    String imageUrl = book['image'] ?? '';
+    String image = book['image'] ?? ''; // Image URL or Base64
     String description = book['description'] ?? 'No description available.';
 
     return GestureDetector(
@@ -139,7 +141,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
               category: category,
               rating: rating,
               price: price,
-              imageUrl: imageUrl,
+              imageUrl: image,
               description: description,
             ),
           ),
@@ -154,9 +156,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            imageUrl.isNotEmpty
-                ? Image.network(imageUrl, height: 80, fit: BoxFit.cover)
-                : const Icon(Icons.book, size: 50),
+            _buildBookImage(image), // ✅ Image Handling
             Padding(
               padding: const EdgeInsets.all(5.0),
               child: Text(title, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -166,5 +166,37 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
         ),
       ),
     );
+  }
+
+  // ✅ **Function to Handle Both Base64 & URL Images**
+  Widget _buildBookImage(String image) {
+    if (image.isEmpty) {
+      return const Icon(Icons.book, size: 50);
+    } else if (image.startsWith("http")) {
+      // ✅ If it's a URL, Load it
+      return Image.network(
+        image,
+        height: 80,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return const Icon(Icons.broken_image, size: 50, color: Colors.redAccent);
+        },
+      );
+    } else {
+      // ✅ If it's Base64, Decode & Show
+      try {
+        Uint8List bytes = base64Decode(image);
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Image.memory(
+            bytes,
+            height: 80,
+            fit: BoxFit.cover,
+          ),
+        );
+      } catch (e) {
+        return const Icon(Icons.broken_image, size: 50, color: Colors.redAccent);
+      }
+    }
   }
 }
