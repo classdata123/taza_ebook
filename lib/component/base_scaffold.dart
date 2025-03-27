@@ -4,9 +4,12 @@ import 'package:ebookapp/screen/Home/home.dart';
 import 'package:ebookapp/screen/admin-panel/Product.dart';
 import 'package:ebookapp/screen/admin-panel/category.dart';
 import 'package:ebookapp/screen/admin-panel/userdetail.dart';
+import 'package:ebookapp/screen/auth-ui/login.dart';
 import 'package:ebookapp/utility/app_content.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 class BaseScaffold extends StatefulWidget {
   final Widget body;
@@ -133,7 +136,7 @@ class _DrawState extends State<Draw> {
             child: ListTile(
               titleAlignment: ListTileTitleAlignment.center,
               title: Text('Product'),
-              leading: Icon(Icons.production_quantity_limits),
+              leading: Icon(Icons.shopping_bag),
               trailing: Icon(Icons.arrow_forward),
               onTap: () {
                 // Add navigation logic here
@@ -153,8 +156,8 @@ class _DrawState extends State<Draw> {
             padding: const EdgeInsets.only(top: 20),
             child: ListTile(
               titleAlignment: ListTileTitleAlignment.center,
-              title: Text('Users'),
-              leading: Icon(Icons.verified_user),
+              title: Text('Category'),
+              leading: Icon(Icons.shop),
               trailing: Icon(Icons.arrow_forward),
               onTap: () {
                 Navigator.push(
@@ -169,6 +172,49 @@ class _DrawState extends State<Draw> {
               },
             ),
           ),
+
+          Padding(
+            padding: const EdgeInsets.only(top: 20),
+            child: ListTile(
+              titleAlignment: ListTileTitleAlignment.center,
+              title: Text('Show product'),
+              leading: Icon(Icons.shopping_bag),
+              trailing: Icon(Icons.arrow_forward),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) =>
+                            AdminUsersDashboard(), // Replace with your actual Product screen widget
+                  ),
+                );
+                // Add navigation logic here
+              },
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.only(top: 20),
+            child: ListTile(
+              titleAlignment: ListTileTitleAlignment.center,
+              title: Text('Show order'),
+              leading: Icon(Icons.receipt_long),
+              trailing: Icon(Icons.arrow_forward),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) =>
+                            AdminUsersDashboard(), // Replace with your actual Product screen widget
+                  ),
+                );
+                // Add navigation logic here
+              },
+            ),
+          ),
+
           Padding(
             padding: const EdgeInsets.only(top: 20),
             child: ListTile(
@@ -180,6 +226,19 @@ class _DrawState extends State<Draw> {
                 // Add navigation logic here
                 Navigator.pop(context);
               },
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: ListTile(
+              textColor: AppConstant.textcolor,
+              onTap: () {
+                Get.to(LoginScreen());
+              },
+              title: Text('Logout'),
+              leading: Icon(Icons.receipt_long, color: AppConstant.textcolor),
+              trailing: Icon(Icons.account_balance),
             ),
           ),
         ],
