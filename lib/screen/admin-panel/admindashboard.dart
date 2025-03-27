@@ -1,7 +1,7 @@
+import 'package:ebookapp/component/base_scaffold.dart';
 import 'package:ebookapp/utility/app_content.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 
 class AdminDashboard extends StatelessWidget {
   final FirebaseFirestore db = FirebaseFirestore.instance;
@@ -20,6 +20,7 @@ class AdminDashboard extends StatelessWidget {
         backgroundColor: AppConstant.appMainColor,
         iconTheme: IconThemeData(color: Colors.white),
       ),
+      drawer: Draw(),
       body: Padding(
         padding: EdgeInsets.all(20),
         child: GridView.count(
