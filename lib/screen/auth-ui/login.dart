@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ebookapp/User/profile_screen.dart';
+import 'package:ebookapp/screen/admin-panel/admindashboard.dart';
 import 'package:ebookapp/utility/app_content.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController password = TextEditingController();
 
   FirebaseAuth auth = FirebaseAuth.instance;
+  final db = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +42,10 @@ class _LoginScreenState extends State<LoginScreen> {
           body: Center(
             child: SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 5,
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -55,7 +60,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     Text(
                       "Login",
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: 8),
@@ -67,10 +76,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     SizedBox(height: 12),
 
                     // Email Field
-                    _buildTextField(controller: email, hint: "Email", icon: Icons.email),
+                    _buildTextField(
+                      controller: email,
+                      hint: "Email",
+                      icon: Icons.email,
+                    ),
 
                     // Password Field
-                    _buildTextField(controller: password, hint: "Password", icon: Icons.lock, obscure: true),
+                    _buildTextField(
+                      controller: password,
+                      hint: "Password",
+                      icon: Icons.lock,
+                      obscure: true,
+                    ),
 
                     // Forgot Password Button
                     Align(
@@ -93,28 +111,68 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                         onPressed: () async {
                           if (email.text.isEmpty || password.text.isEmpty) {
-                            Get.snackbar("Error", "Please fill all fields", backgroundColor: Colors.red, colorText: Colors.white);
+                            Get.snackbar(
+                              "Error",
+                              "Please fill all fields",
+                              backgroundColor: Colors.red,
+                              colorText: Colors.white,
+                            );
                           } else {
                             try {
-                              UserCredential userCredential = await auth.signInWithEmailAndPassword(
-                                email: email.text,
-                                password: password.text,
-                              );
+                              UserCredential userCredential = await auth
+                                  .signInWithEmailAndPassword(
+                                    email: email.text,
+                                    password: password.text,
+                                  );
+                              final QuerySnapshot userdata =
+                                  await db
+                                      .collection('users')
+                                      .where(
+                                        'uId',
+                                        isEqualTo: userCredential.user!.uid,
+                                      )
+                                      .get();
 
-                              Get.snackbar("Success", "Login Successful!", backgroundColor: Colors.green, colorText: Colors.white);
+                              if (userdata.docs.first['isadmin'] == true) {
+                                Get.to(AdminDashboard());
+
+                                Get.snackbar(
+                                  "Success",
+                                  "Login Successful!",
+                                  backgroundColor: Colors.green,
+                                  colorText: Colors.white,
+                                );
+                              } else {
+                                Get.offAll(() => HomeScreenContent());
+                                Get.snackbar(
+                                  "Success",
+                                  "Login Successful!",
+                                  backgroundColor: Colors.green,
+                                  colorText: Colors.white,
+                                );
+                              }
 
                               // ✅ Redirect to Home Screen
-                              Get.offAll(() => HomeScreenContent());
                             } catch (e) {
-                              Get.snackbar("Error", "Invalid email or password", backgroundColor: Colors.red, colorText: Colors.white);
+                              Get.snackbar(
+                                "Error",
+                                "Invalid email or password",
+                                backgroundColor: Colors.red,
+                                colorText: Colors.white,
+                              );
                             }
                           }
                         },
-                        child: Text("Login", style: TextStyle(color: Colors.white, fontSize: 16)),
+                        child: Text(
+                          "Login",
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
                       ),
                     ),
 
@@ -131,7 +189,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           children: [
                             TextSpan(
                               text: "Sign Up",
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
                             ),
                           ],
                         ),
@@ -147,7 +208,12 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildTextField({required TextEditingController controller, required String hint, required IconData icon, bool obscure = false}) {
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    bool obscure = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: TextField(
@@ -157,7 +223,10 @@ class _LoginScreenState extends State<LoginScreen> {
           filled: true,
           fillColor: Colors.grey[300],
           hintText: hint,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide.none,
+          ),
           prefixIcon: Icon(icon, color: Colors.black54),
         ),
       ),
@@ -167,18 +236,30 @@ class _LoginScreenState extends State<LoginScreen> {
   // 🔹 Function to reset password via email
   void resetPassword() async {
     if (email.text.isEmpty) {
-      Get.snackbar("Error", "Please enter your email to reset password",
-          backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        "Error",
+        "Please enter your email to reset password",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       return;
     }
 
     try {
       await auth.sendPasswordResetEmail(email: email.text.trim());
-      Get.snackbar("Success", "Password reset email sent!",
-          backgroundColor: Colors.green, colorText: Colors.white);
+      Get.snackbar(
+        "Success",
+        "Password reset email sent!",
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
     } catch (e) {
-      Get.snackbar("Error", "Failed to send reset email. Please try again.",
-          backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        "Error",
+        "Failed to send reset email. Please try again.",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     }
   }
 }

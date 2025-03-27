@@ -125,7 +125,7 @@ class _DrawState extends State<Draw> {
                   MaterialPageRoute(
                     builder:
                         (context) =>
-                            HomeScreen(), // Replace with your actual Product screen widget
+                            HomeScreenContent(), // Replace with your actual Product screen widget
                   ),
                 );
               },
