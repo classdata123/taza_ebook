@@ -134,12 +134,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                   await db
                                       .collection('users')
                                       .where(
-                                        'uId',
+                                        'uid',
                                         isEqualTo: userCredential.user!.uid,
                                       )
                                       .get();
 
-                              if (userdata.docs.first['isadmin'] == true) {
+                              if (userdata.docs.first['isAdmin'] == true) {
                                 Get.to(AdminDashboard());
 
                                 Get.snackbar(

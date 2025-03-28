@@ -61,7 +61,7 @@ class _DrawState extends State<Draw> {
   Future<void> fetchUserData() async {
     try {
       QuerySnapshot querySnapshot =
-          await db.collection('users').where('uId', isEqualTo: user!.uid).get();
+          await db.collection('users').where('uid', isEqualTo: user!.uid).get();
 
       if (querySnapshot.docs.isNotEmpty) {
         setState(() {
