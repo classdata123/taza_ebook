@@ -144,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
           'name': user.displayName ?? '',
           'email': user.email ?? '',
           'image': user.photoURL ?? '',
-          'isAdmin': false,
+          'isAdmin': true,
           'phone': '',
         });
       }
