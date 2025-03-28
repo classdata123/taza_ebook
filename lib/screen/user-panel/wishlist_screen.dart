@@ -1,9 +1,10 @@
-import 'package:ebookapp/screen/Home/Book_details.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:ebookapp/controller/cart_controller.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 
 class WishlistScreen extends StatelessWidget {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -19,7 +20,9 @@ class WishlistScreen extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot>(
         stream: _db.collection('users').doc(uid).collection('wishlist').snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(child: Text("Your wishlist is empty."));
@@ -36,9 +39,7 @@ class WishlistScreen extends StatelessWidget {
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 child: ListTile(
-                  leading: item['image'] != null && item['image'].toString().isNotEmpty
-                      ? Image.network(item['image'], width: 50, fit: BoxFit.cover)
-                      : const Icon(Icons.book, size: 40),
+                  leading: _buildBookImage(item['image'] ?? ''), // Using updated function
                   title: Text(item['title'] ?? 'Unknown Title'),
                   subtitle: Text("by ${item['author'] ?? 'Unknown'}\n\$${item['price'] ?? '0.00'}"),
                   isThreeLine: true,
@@ -81,5 +82,36 @@ class WishlistScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  /// Function to handle image loading
+  Widget _buildBookImage(String image) {
+    print("Loading Image: $image"); // Debugging Print
+
+    if (image.isEmpty) {
+      return const Icon(Icons.book, size: 50);
+    } else if (image.startsWith("http")) {
+      return Image.network(
+        image,
+        height: 80,
+        width: 50,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          print("Image failed to load: $image"); // Debugging Print
+          return const Icon(Icons.broken_image, size: 50, color: Colors.redAccent);
+        },
+      );
+    } else {
+      try {
+        Uint8List bytes = base64Decode(image);
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Image.memory(bytes, height: 80, width: 50, fit: BoxFit.cover),
+        );
+      } catch (e) {
+        print("Base64 decoding error: $e"); // Debugging Print
+        return const Icon(Icons.broken_image, size: 50, color: Colors.redAccent);
+      }
+    }
   }
 }
