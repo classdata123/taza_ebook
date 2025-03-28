@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:ebookapp/screen/auth-ui/register.dart'; // Correct import
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ebookapp/utility/app_content.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -17,7 +17,11 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Timer(Duration(seconds: 3), () {
-      Get.offNamed("/register"); // Route ke through navigate kro
+      if (FirebaseAuth.instance.currentUser != null) {
+        Get.offNamed("/home");
+      } else {
+        Get.offNamed("/register");
+      }
     });
   }
 
@@ -25,7 +29,6 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppConstant.appMainbg,
-      appBar: AppBar(backgroundColor: AppConstant.appMainbg, elevation: 0),
       body: Column(
         children: [
           Expanded(
