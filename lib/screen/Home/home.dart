@@ -1,15 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ebookapp/User/profile_screen.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class HomeScreenContent extends StatefulWidget {
+  const HomeScreenContent({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HomeScreenContent> createState() => _HomeScreenContentState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenContentState extends State<HomeScreenContent> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
@@ -63,6 +64,8 @@ class HomeScreenContent extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Book Store"),
         actions: [
+          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.shopping_cart), onPressed: () {}),
           IconButton(icon: const Icon(Icons.search), onPressed: () {}),
           IconButton(icon: const Icon(Icons.shopping_cart), onPressed: () {}),
         ],

@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
       getPages: [
         GetPage(name: "/register", page: () => RegisterScreen()),
         GetPage(name: "/login", page: () => LoginScreen()), // ✅ Login Route
-        GetPage(name: "/home", page: () => HomeScreen()), 
+        GetPage(name: "/home", page: () => HomeScreenContent()), 
       ],
     );
   }
