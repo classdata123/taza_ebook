@@ -175,7 +175,7 @@ class _AddToCartPageState extends State<AddToCartPage> {
           );
         },
       ),
-      bottomNavigationBar: bottom(),
+    
     );
   }
 }

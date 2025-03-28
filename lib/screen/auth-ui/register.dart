@@ -100,9 +100,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       controller: phone,
                       hint: "Phone",
                       icon: Icons.phone_callback,
-                      obscure: true,
+                      obscure: false, // fixed
                     ),
-
                     SizedBox(height: 12), // Adjusted space
                     // Register Button
                     SizedBox(
