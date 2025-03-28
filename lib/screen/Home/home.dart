@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ebookapp/screen/Home/Book_details.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ebookapp/User/profile_screen.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 
 class HomeScreenContent extends StatefulWidget {
   const HomeScreenContent({super.key});
@@ -14,11 +15,17 @@ class HomeScreenContent extends StatefulWidget {
 class _HomeScreenContentState extends State<HomeScreenContent> {
   int _selectedIndex = 0;
 
+  final List<Widget> _screens = [
+    const HomeScreenContent(), // Dynamic Home Content
+    const CategoriesScreen(),  // Dynamic Categories
+    const UserProfileScreen(), // User Profile
+  ];
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
-    if (index == 2) { 
+    if (index == 2) {
       Get.to(() => UserProfileScreen());
     }
   }
@@ -31,6 +38,8 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
         actions: [
           IconButton(icon: const Icon(Icons.search), onPressed: () {}),
           IconButton(icon: const Icon(Icons.shopping_cart), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.shopping_cart), onPressed: () {}),
         ],
       ),
       body: SingleChildScrollView(
@@ -38,17 +47,36 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Text("Categories", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+
+            // 🔹 Fetch Categories Dynamically
+            FutureBuilder<List<String>>(
+              future: fetchCategories(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return const Center(child: Text("Error loading categories"));
+                }
+                List<String> categories = snapshot.data ?? [];
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: categories.map((category) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: Chip(label: Text(category)),
+                      );
+                    }).toList(),
+                  ),
+                );
+              },
+            ),
+            
+            const SizedBox(height: 20),
             const Text("New Arrivals", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            _buildBookList(),
-
-            const SizedBox(height: 20),
-            const Text("Bestsellers", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            _buildBookList(),
-
-            const SizedBox(height: 20),
-            const Text("Top Books", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             _buildBookGrid(),
           ],
@@ -125,7 +153,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
     String category = book['category'] ?? 'N/A';
     double rating = double.tryParse(book['rating'].toString()) ?? 0.0;
     String price = book['price'] ?? '0';
-    String imageUrl = book['image'] ?? '';
+    String image = book['image'] ?? ''; // Image URL or Base64
     String description = book['description'] ?? 'No description available.';
 
     return GestureDetector(
@@ -139,7 +167,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
               category: category,
               rating: rating,
               price: price,
-              imageUrl: imageUrl,
+              imageUrl: image,
               description: description,
             ),
           ),
@@ -154,9 +182,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            imageUrl.isNotEmpty
-                ? Image.network(imageUrl, height: 80, fit: BoxFit.cover)
-                : const Icon(Icons.book, size: 50),
+            _buildBookImage(image), // ✅ Image Handling
             Padding(
               padding: const EdgeInsets.all(5.0),
               child: Text(title, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -166,5 +192,37 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
         ),
       ),
     );
+  }
+
+  // ✅ **Function to Handle Both Base64 & URL Images**
+  Widget _buildBookImage(String image) {
+    if (image.isEmpty) {
+      return const Icon(Icons.book, size: 50);
+    } else if (image.startsWith("http")) {
+      // ✅ If it's a URL, Load it
+      return Image.network(
+        image,
+        height: 80,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return const Icon(Icons.broken_image, size: 50, color: Colors.redAccent);
+        },
+      );
+    } else {
+      // ✅ If it's Base64, Decode & Show
+      try {
+        Uint8List bytes = base64Decode(image);
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Image.memory(
+            bytes,
+            height: 80,
+            fit: BoxFit.cover,
+          ),
+        );
+      } catch (e) {
+        return const Icon(Icons.broken_image, size: 50, color: Colors.redAccent);
+      }
+    }
   }
 }
