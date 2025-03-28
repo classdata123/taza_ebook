@@ -82,6 +82,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+  
     return Scaffold(
       appBar: AppBar(
         title: const Text('Book Details', style: TextStyle(color: Colors.black)),
@@ -140,6 +141,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
+                  print(widget.title);
                   cartController.addToCart({
                     'title': widget.title,
                     'author': widget.author,
