@@ -1,4 +1,4 @@
-import 'package:ebookapp/User/profile_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -13,9 +13,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    const HomeScreenContent(), // Extract your home content into a separate widget
-    // const CategoriesScreen(),  // Placeholder for categories
-    UserProfileScreen(), // User Profile Screen
+    const HomeScreenContent(), // Dynamic Home Content
+    const CategoriesScreen(),  // Dynamic Categories
+    const UserProfileScreen(), // User Profile
   ];
 
   void _onItemTapped(int index) {
@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          // BottomNavigationBarItem(icon: Icon(Icons.category), label: "Categories"),
+          BottomNavigationBarItem(icon: Icon(Icons.category), label: "Categories"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Account"),
         ],
       ),
@@ -43,8 +43,19 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+// 🔹 HomeScreenContent Fetches Books & Categories from Firebase
 class HomeScreenContent extends StatelessWidget {
   const HomeScreenContent({super.key});
+
+  Future<List<Map<String, dynamic>>> fetchBooks() async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('books').get();
+    return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+  }
+
+  Future<List<String>> fetchCategories() async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('categories').get();
+    return snapshot.docs.map((doc) => doc['name'].toString()).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,14 +63,8 @@ class HomeScreenContent extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Book Store"),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.shopping_cart),
-            onPressed: () {},
-          ),
+          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.shopping_cart), onPressed: () {}),
         ],
       ),
       body: SingleChildScrollView(
@@ -69,73 +74,83 @@ class HomeScreenContent extends StatelessWidget {
           children: [
             const Text("Categories", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: ["Fiction", "Science", "History", "Romance"].map((category) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    child: Chip(label: Text(category)),
-                  );
-                }).toList(),
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text("New Arrivals", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 180,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: 5,
-                itemBuilder: (context, index) {
-                  return Container(
-                    width: 120,
-                    margin: const EdgeInsets.symmetric(horizontal: 5),
-                    color: Colors.grey[300],
-                    child: const Center(child: Text("Book Cover")),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text("Bestsellers", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 180,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: 5,
-                itemBuilder: (context, index) {
-                  return Container(
-                    width: 120,
-                    margin: const EdgeInsets.symmetric(horizontal: 5),
-                    color: Colors.grey[300],
-                    child: const Center(child: Text("Book Cover")),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text("Top Books", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 0.7,
-              ),
-              itemCount: 6,
-              itemBuilder: (context, index) {
-                return Container(
-                  color: Colors.grey[300],
-                  child: const Center(child: Text("Book Cover")),
+
+            // 🔹 Fetch Categories Dynamically
+            FutureBuilder<List<String>>(
+              future: fetchCategories(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return const Center(child: Text("Error loading categories"));
+                }
+                List<String> categories = snapshot.data ?? [];
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: categories.map((category) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: Chip(label: Text(category)),
+                      );
+                    }).toList(),
+                  ),
                 );
               },
             ),
+            
+            const SizedBox(height: 20),
+            const Text("New Arrivals", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+
+            // 🔹 Fetch Books from Firestore
+            FutureBuilder<List<Map<String, dynamic>>>(
+              future: fetchBooks(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return const Center(child: Text("Error loading books"));
+                }
+                List<Map<String, dynamic>> books = snapshot.data ?? [];
+                return SizedBox(
+                  height: 180,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: books.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        elevation: 3,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        child: Column(
+                          children: [
+                            books[index]['image'] != null
+                                ? Image.network(
+                                    books[index]['image'], // Firebase image URL
+                                    width: 100,
+                                    height: 120,
+                                    fit: BoxFit.cover,
+                                  )
+                                : const Icon(Icons.book, size: 100, color: Colors.black54),
+                            Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Text(
+                                books[index]['Bookname'] ?? "No Title",
+                                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -143,6 +158,7 @@ class HomeScreenContent extends StatelessWidget {
   }
 }
 
+// 🔹 Categories Screen (Can be made dynamic later)
 class CategoriesScreen extends StatelessWidget {
   const CategoriesScreen({super.key});
 
@@ -151,6 +167,19 @@ class CategoriesScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("Categories")),
       body: const Center(child: Text("Categories List")),
+    );
+  }
+}
+
+// 🔹 User Profile Screen Placeholder
+class UserProfileScreen extends StatelessWidget {
+  const UserProfileScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Profile")),
+      body: const Center(child: Text("User Profile Details")),
     );
   }
 }
