@@ -35,6 +35,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/image/splash.json
+    - assets/image/mainsplash.json
+    - assets/image/loading.json
     - assets/image/logo.json
-    - assets/images/   # Add this if you store book images locally
+    # - assets/images/   # Add this if you store book images locally
