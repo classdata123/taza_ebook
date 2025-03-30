@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ebookapp/screen/admin-panel/admindashboard.dart';
 import 'package:ebookapp/screen/home/home.dart';
-import 'package:ebookapp/utility/app_content.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -60,81 +59,19 @@ class _LoginScreenState extends State<LoginScreen> {
                       width: double.infinity,
                       height: 50,
                       child: ElevatedButton(
-
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        onPressed: () async {
-                          if (email.text.isEmpty || password.text.isEmpty) {
-                            Get.snackbar(
-                              "Error",
-                              "Please fill all fields",
-                              backgroundColor: Colors.red,
-                              colorText: Colors.white,
-                            );
-                          } else {
-                            try {
-                              UserCredential userCredential = await auth
-                                  .signInWithEmailAndPassword(
-                                    email: email.text,
-                                    password: password.text,
-                                  );
-                              final QuerySnapshot userdata =
-                                  await db
-                                      .collection('users')
-                                      .where(
-                                        'uid',
-                                        isEqualTo: userCredential.user!.uid,
-                                      )
-                                      .get();
-
-                              if (userdata.docs.first['isAdmin'] == true) {
-                                Get.to(AdminDashboard());
-
-                                Get.snackbar(
-                                  "Success",
-                                  "Login Successful!",
-                                  backgroundColor: Colors.green,
-                                  colorText: Colors.white,
-                                );
-                              } else {
-                                Get.offAll(() => HomeScreenContent());
-                                Get.snackbar(
-                                  "Success",
-                                  "Login Successful!",
-                                  backgroundColor: Colors.green,
-                                  colorText: Colors.white,
-                                );
-                              }
-
-                              // ✅ Redirect to Home Screen
-                            } catch (e) {
-                              Get.snackbar(
-                                "Error",
-                                "Invalid email or password",
-                                backgroundColor: Colors.red,
-                                colorText: Colors.white,
-                              );
-                            }
-                          }
-                        },
-                        child: Text(
-                          "Login",
-                          style: TextStyle(color: Colors.white, fontSize: 16),
-                        ),
-
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
                         onPressed: loginWithEmail,
-                        child: Text("Login", style: TextStyle(color: Colors.white)),
+                        child: Text("Login", style: TextStyle(color: Colors.white, fontSize: 16)),
                       ),
                     ),
                     SizedBox(height: 12),
                     Text("or"),
                     SizedBox(height: 12),
-                    // ✅ Google Sign-In Button
                     SizedBox(
                       width: double.infinity,
                       height: 50,
@@ -142,7 +79,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         icon: Icon(Icons.login),
                         label: Text("Sign in with Google"),
                         onPressed: loginWithGoogle,
-
                       ),
                     ),
                     SizedBox(height: 12),
@@ -178,7 +114,6 @@ class _LoginScreenState extends State<LoginScreen> {
         Get.snackbar("Error", "User record not found", backgroundColor: Colors.red);
         return;
       }
-
       bool isAdmin = doc['isAdmin'] ?? false;
       Get.offAll(() => isAdmin ? AdminDashboard() : HomeScreenContent());
       Get.snackbar("Success", "Login Successful!", backgroundColor: Colors.green, colorText: Colors.white);
@@ -205,17 +140,15 @@ class _LoginScreenState extends State<LoginScreen> {
       final userDoc = await docRef.get();
 
       if (!userDoc.exists) {
-        // Add user to DB
         await docRef.set({
           'uid': user.uid,
           'name': user.displayName ?? '',
           'email': user.email ?? '',
           'image': user.photoURL ?? '',
-          'isAdmin': true,
+          'isAdmin': false,
           'phone': '',
         });
       }
-
       Get.offAll(() => HomeScreenContent());
       Get.snackbar("Success", "Logged in with Google", backgroundColor: Colors.green, colorText: Colors.white);
     } catch (e) {
