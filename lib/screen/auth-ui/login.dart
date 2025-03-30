@@ -60,6 +60,72 @@ class _LoginScreenState extends State<LoginScreen> {
                       width: double.infinity,
                       height: 50,
                       child: ElevatedButton(
+
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () async {
+                          if (email.text.isEmpty || password.text.isEmpty) {
+                            Get.snackbar(
+                              "Error",
+                              "Please fill all fields",
+                              backgroundColor: Colors.red,
+                              colorText: Colors.white,
+                            );
+                          } else {
+                            try {
+                              UserCredential userCredential = await auth
+                                  .signInWithEmailAndPassword(
+                                    email: email.text,
+                                    password: password.text,
+                                  );
+                              final QuerySnapshot userdata =
+                                  await db
+                                      .collection('users')
+                                      .where(
+                                        'uid',
+                                        isEqualTo: userCredential.user!.uid,
+                                      )
+                                      .get();
+
+                              if (userdata.docs.first['isAdmin'] == true) {
+                                Get.to(AdminDashboard());
+
+                                Get.snackbar(
+                                  "Success",
+                                  "Login Successful!",
+                                  backgroundColor: Colors.green,
+                                  colorText: Colors.white,
+                                );
+                              } else {
+                                Get.offAll(() => HomeScreenContent());
+                                Get.snackbar(
+                                  "Success",
+                                  "Login Successful!",
+                                  backgroundColor: Colors.green,
+                                  colorText: Colors.white,
+                                );
+                              }
+
+                              // ✅ Redirect to Home Screen
+                            } catch (e) {
+                              Get.snackbar(
+                                "Error",
+                                "Invalid email or password",
+                                backgroundColor: Colors.red,
+                                colorText: Colors.white,
+                              );
+                            }
+                          }
+                        },
+                        child: Text(
+                          "Login",
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
+
                         style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
                         onPressed: loginWithEmail,
                         child: Text("Login", style: TextStyle(color: Colors.white)),
@@ -76,6 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         icon: Icon(Icons.login),
                         label: Text("Sign in with Google"),
                         onPressed: loginWithGoogle,
+
                       ),
                     ),
                     SizedBox(height: 12),
