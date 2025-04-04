@@ -197,16 +197,9 @@ class CartScreen extends StatelessWidget {
                 ),
               ),
             ],
-<<<<<<< HEAD
-          );
-        },
-      ),
-          bottomNavigationBar: BottomNavBar(),
-=======
           ),
         );
       }),
->>>>>>> 0026ab193e6e635821ed101317943f3adab8bdb5
     );
   }
 }
