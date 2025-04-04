@@ -1,12 +1,84 @@
 import 'package:ebookapp/controller/cart_controller.dart';
-import 'package:ebookapp/screen/Home/bottom.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:uuid/uuid.dart';
 
 class CartScreen extends StatelessWidget {
   CartScreen({super.key});
 
   final CartController cartController = Get.find();
+
+  final TextEditingController addressController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+
+  void showCheckoutForm(BuildContext context) {
+    showDialog(
+      context: context,
+      builder:
+          (_) => AlertDialog(
+            title: const Text("Enter Delivery Details"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(labelText: "Phone Number"),
+                ),
+                TextField(
+                  controller: addressController,
+                  maxLines: 2,
+                  decoration: const InputDecoration(labelText: "Address"),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(),
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final phone = phoneController.text.trim();
+                  final address = addressController.text.trim();
+
+                  if (phone.isEmpty || address.isEmpty) {
+                    Get.snackbar(
+                      "Missing Info",
+                      "Please fill in all fields",
+                      backgroundColor: Colors.red,
+                      colorText: Colors.white,
+                    );
+                    return;
+                  }
+
+                  final orderId =
+                      DateTime.now().millisecondsSinceEpoch
+                          .toString(); // unique
+                  final trackingId = const Uuid().v4(); // unique
+
+                  await cartController.placeOrder(
+                    address: address,
+                    phone: phone,
+                    orderId: orderId,
+                    trackingId: trackingId,
+                  );
+
+                  Get.back(); // Close the dialog
+                  Get.snackbar(
+                    "Success",
+                    "Order placed successfully!",
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: Colors.green,
+                    colorText: Colors.white,
+                  );
+                },
+                child: const Text("Place Order"),
+              ),
+            ],
+          ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,12 +91,7 @@ class CartScreen extends StatelessWidget {
       ),
       body: Obx(() {
         if (cartController.cartItems.isEmpty) {
-          return const Center(
-            child: Text(
-              "Your cart is empty.",
-              style: TextStyle(color: Colors.black),
-            ),
-          );
+          return const Center(child: Text("Your cart is empty."));
         }
         return ListView.builder(
           itemCount: cartController.cartItems.length,
@@ -39,23 +106,17 @@ class CartScreen extends StatelessWidget {
                   item['title'],
                   style: const TextStyle(color: Colors.black),
                 ),
-                subtitle: Text(
-                  "\$${item['price'].toStringAsFixed(2)}",
-                  style: const TextStyle(color: Colors.black),
-                ),
+                subtitle: Text("\$${item['price'].toStringAsFixed(2)}"),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.remove, color: Colors.black),
+                      icon: const Icon(Icons.remove),
                       onPressed: () => cartController.updateQuantity(index, -1),
                     ),
-                    Text(
-                      '${item['quantity']}',
-                      style: const TextStyle(color: Colors.black),
-                    ), // ✅ Quantity Updates
+                    Text('${item['quantity']}'),
                     IconButton(
-                      icon: const Icon(Icons.add, color: Colors.black),
+                      icon: const Icon(Icons.add),
                       onPressed: () => cartController.updateQuantity(index, 1),
                     ),
                   ],
@@ -66,9 +127,7 @@ class CartScreen extends StatelessWidget {
         );
       }),
       bottomNavigationBar: Obx(() {
-        if (cartController.cartItems.isEmpty) {
-          return const SizedBox.shrink();
-        }
+        if (cartController.cartItems.isEmpty) return const SizedBox.shrink();
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -83,19 +142,11 @@ class CartScreen extends StatelessWidget {
                 children: [
                   const Text(
                     "Total:",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   Text(
                     "\$${cartController.totalPrice.value.toStringAsFixed(2)}",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green,
-                    ),
+                    style: const TextStyle(fontSize: 18, color: Colors.green),
                   ),
                 ],
               ),
@@ -103,17 +154,7 @@ class CartScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () async {
-                    await cartController
-                        .placeOrder(); // ✅ Fixed order placement
-                    Get.snackbar(
-                      "Success",
-                      "Order placed successfully!",
-                      snackPosition: SnackPosition.BOTTOM,
-                      backgroundColor: Colors.green,
-                      colorText: Colors.white,
-                    );
-                  },
+                  onPressed: () => showCheckoutForm(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
                   ),
@@ -124,7 +165,6 @@ class CartScreen extends StatelessWidget {
           ),
         );
       }),
-        
     );
   }
 }

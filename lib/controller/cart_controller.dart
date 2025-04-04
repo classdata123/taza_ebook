@@ -4,9 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class CartController extends GetxController {
   var cartItems = <Map<String, dynamic>>[].obs;
-  var totalPrice = 0.0.obs; // ✅ Reactive total price
+  var totalPrice = 0.0.obs;
 
-  // 🛒 Add item to cart
   void addToCart(Map<String, dynamic> item) {
     int index = cartItems.indexWhere(
       (cartItem) => cartItem['id'] == item['id'],
@@ -20,7 +19,6 @@ class CartController extends GetxController {
     calculateTotalPrice();
   }
 
-  // ❌ Remove item from cart
   void removeFromCart(int index) {
     if (index >= 0 && index < cartItems.length) {
       cartItems.removeAt(index);
@@ -28,7 +26,6 @@ class CartController extends GetxController {
     }
   }
 
-  // 🔄 Update item quantity
   void updateQuantity(int index, int delta) {
     if (index < 0 || index >= cartItems.length) {
       print("❌ Invalid index: $index");
@@ -38,23 +35,16 @@ class CartController extends GetxController {
     var item = cartItems[index];
     int newQuantity = item['quantity'] + delta;
 
-    print(
-      "🔄 Updating quantity: ${item['title']} | Old: ${item['quantity']} | Delta: $delta",
-    );
-
     if (newQuantity <= 0) {
       cartItems.removeAt(index);
-      print("🗑️ Item removed from cart.");
     } else {
       cartItems[index] = {...item, 'quantity': newQuantity};
-      print("✅ Updated Quantity: ${cartItems[index]['quantity']}");
     }
 
-    cartItems.refresh(); // ✅ UI refresh
+    cartItems.refresh();
     calculateTotalPrice();
   }
 
-  // 💰 Calculate total price
   void calculateTotalPrice() {
     totalPrice.value = cartItems.fold(0.0, (total, item) {
       double price = (item['price'] ?? 0.0) * (item['quantity'] ?? 1);
@@ -62,15 +52,21 @@ class CartController extends GetxController {
     });
   }
 
-  // 🛍 Place order & save to Firestore
-  Future<void> placeOrder() async {
+  Future<void> placeOrder({
+    required String address,
+    required String phone,
+    required String orderId,
+    required String trackingId,
+  }) async {
     if (cartItems.isEmpty) return;
 
     final User? user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
     try {
-      await FirebaseFirestore.instance.collection('orders').add({
+      await FirebaseFirestore.instance.collection('orders').doc(orderId).set({
+        'orderId': orderId,
+        'trackingId': trackingId,
         'userId': user.uid,
         'products':
             cartItems
@@ -84,13 +80,15 @@ class CartController extends GetxController {
                 )
                 .toList(),
         'totalPrice': totalPrice.value,
-        'status': 'pending', // ✅ Initial status
+        'address': address,
+        'phone': phone,
+        'status': 'pending',
         'orderDate': Timestamp.now(),
       });
 
-      cartItems.clear(); // ✅ Empty cart after order
+      cartItems.clear();
       totalPrice.value = 0.0;
-      print("✅ Order placed successfully");
+      print("✅ Order placed with tracking ID: $trackingId");
     } catch (e) {
       print("❌ Error placing order: $e");
     }

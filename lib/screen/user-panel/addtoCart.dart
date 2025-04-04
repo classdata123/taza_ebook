@@ -1,182 +1,212 @@
-import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ebookapp/component/global_app_bar.dart';
-import 'package:ebookapp/screen/Home/bottom.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:ebookapp/controller/cart_controller.dart';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'dart:math';
 
-class AddToCartPage extends StatefulWidget {
-  const AddToCartPage({Key? key}) : super(key: key);
+class CartScreen extends StatelessWidget {
+  CartScreen({super.key});
 
-  @override
-  State<AddToCartPage> createState() => _AddToCartPageState();
-}
+  final CartController cartController = Get.find();
 
-class _AddToCartPageState extends State<AddToCartPage> {
-  late Future<List<Map<String, dynamic>>> _cartProducts;
-  final _addressController = TextEditingController();
-  final _cityController = TextEditingController();
-  final _postalCodeController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _cartProducts = _getCartProducts();
-  }
-
-  Future<List<Map<String, dynamic>>> _getCartProducts() async {
-    var user = FirebaseAuth.instance.currentUser;
-    if (user == null) return [];
-
-    var cartSnapshot =
-        await FirebaseFirestore.instance
-            .collection('cart')
-            .where('userId', isEqualTo: user.uid)
-            .get();
-
-    List<Map<String, dynamic>> cartProducts = [];
-    for (var cartItem in cartSnapshot.docs) {
-      var productId = cartItem['productId'];
-
-      var productSnapshot =
-          await FirebaseFirestore.instance
-              .collection('product')
-              .doc(productId)
-              .get();
-
-      if (productSnapshot.exists) {
-        var productData = productSnapshot.data();
-        cartProducts.add({
-          'cartId': cartItem.id,
-          'productId': productId,
-          'name': productData?['name'],
-          'price': productData?['price'],
-          'image': productData?['image'],
-          'description': productData?['description'],
-        });
-      }
-    }
-    return cartProducts;
+  // 🔢 Tracking ID generator
+  String generateTrackingId() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final rand = Random();
+    return List.generate(
+      10,
+      (index) => chars[rand.nextInt(chars.length)],
+    ).join();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      // appBar: GlobalAppBar(),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _cartProducts,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No items in the cart.'));
-          }
-
-          var cartProducts = snapshot.data!;
-          double totalPrice = cartProducts.fold(0, (total, product) {
-            return total +
-                int.parse((product['price'] ?? '0').replaceAll(',', ''));
-          });
-
-          return Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  itemCount: cartProducts.length,
-                  itemBuilder: (context, index) {
-                    var product = cartProducts[index];
-
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Card(
-                        color: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                        margin: EdgeInsets.only(bottom: 15),
-                        elevation: 8,
-                        child: ListTile(
-                          leading:
-                              product['image'] != null
-                                  ? Image.memory(
-                                    base64Decode(product['image'] ?? ''),
-                                    width: 50,
-                                    height: 50,
-                                    fit: BoxFit.cover,
-                                  )
-                                  : const Icon(
-                                    Icons.image_not_supported,
-                                    size: 50,
-                                    color: Colors.white,
-                                  ),
-                          title: Text(
-                            product['name'],
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          subtitle: Text(
-                            '\$${product['price']}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          trailing: IconButton(
-                            icon: const Icon(
-                              Icons.remove_shopping_cart,
-                              color: Colors.white,
-                            ),
-                            onPressed: () {},
-                          ),
-                        ),
-                      ),
-                    );
-                  },
+      appBar: AppBar(
+        title: const Text("Your Cart"),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+      ),
+      body: Obx(() {
+        if (cartController.cartItems.isEmpty) {
+          return const Center(
+            child: Text(
+              "Your cart is empty.",
+              style: TextStyle(color: Colors.black),
+            ),
+          );
+        }
+        return ListView.builder(
+          itemCount: cartController.cartItems.length,
+          itemBuilder: (context, index) {
+            final item = cartController.cartItems[index];
+            return Card(
+              color: Colors.white,
+              margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              child: ListTile(
+                leading: const Icon(Icons.book, color: Colors.black),
+                title: Text(
+                  item['title'],
+                  style: const TextStyle(color: Colors.black),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                subtitle: Text(
+                  "\$${item['price'].toStringAsFixed(2)}",
+                  style: const TextStyle(color: Colors.black),
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      'Total: \$${totalPrice.toStringAsFixed(2)}',
-                      style: const TextStyle(fontSize: 18, color: Colors.black),
+                    IconButton(
+                      icon: const Icon(Icons.remove, color: Colors.black),
+                      onPressed: () => cartController.updateQuantity(index, -1),
                     ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 40,
-                          vertical: 12,
-                        ),
-                        child: Text(
-                          "Place Order",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                      onPressed: () {},
+                    Text(
+                      '${item['quantity']}',
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.add, color: Colors.black),
+                      onPressed: () => cartController.updateQuantity(index, 1),
                     ),
                   ],
                 ),
               ),
+            );
+          },
+        );
+      }),
+      bottomNavigationBar: Obx(() {
+        if (cartController.cartItems.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(top: BorderSide(color: Colors.grey.shade300)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Total:",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  Text(
+                    "\$${cartController.totalPrice.value.toStringAsFixed(2)}",
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        final TextEditingController addressController =
+                            TextEditingController();
+                        final TextEditingController phoneController =
+                            TextEditingController();
+                        String orderId =
+                            DateTime.now().millisecondsSinceEpoch.toString();
+                        String trackingId = generateTrackingId();
+
+                        return AlertDialog(
+                          title: const Text("Enter your details"),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TextField(
+                                controller: addressController,
+                                decoration: const InputDecoration(
+                                  labelText: "Address",
+                                ),
+                              ),
+                              TextField(
+                                controller: phoneController,
+                                decoration: const InputDecoration(
+                                  labelText: "Phone Number",
+                                ),
+                                keyboardType: TextInputType.phone,
+                              ),
+                            ],
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Get.back();
+                              },
+                              child: const Text("Cancel"),
+                            ),
+                            ElevatedButton(
+                              onPressed: () async {
+                                if (addressController.text.isEmpty ||
+                                    phoneController.text.isEmpty) {
+                                  Get.snackbar(
+                                    "Error",
+                                    "Please fill all fields",
+                                    snackPosition: SnackPosition.BOTTOM,
+                                    backgroundColor: Colors.red,
+                                    colorText: Colors.white,
+                                  );
+                                  return;
+                                }
+
+                                await cartController.placeOrder(
+                                  address: addressController.text,
+                                  phone: phoneController.text,
+                                  orderId: orderId,
+                                  trackingId: trackingId,
+                                );
+
+                                Get.back(); // Close dialog
+                                Get.snackbar(
+                                  "Success",
+                                  "Order placed! Tracking ID: $trackingId",
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  backgroundColor: Colors.green,
+                                  colorText: Colors.white,
+                                );
+                              },
+                              child: const Text("Submit"),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                  ),
+                  child: const Text("Proceed to Checkout"),
+                ),
+              ),
             ],
+<<<<<<< HEAD
           );
         },
       ),
           bottomNavigationBar: BottomNavBar(),
+=======
+          ),
+        );
+      }),
+>>>>>>> 0026ab193e6e635821ed101317943f3adab8bdb5
     );
   }
 }
