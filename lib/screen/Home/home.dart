@@ -1,4 +1,6 @@
+import 'package:ebookapp/screen/user-panel/order_show.dart';
 import 'package:ebookapp/screen/user-panel/profile_screen.dart';
+import 'package:ebookapp/screen/user-panel/trackorder.dart';
 import 'package:ebookapp/screen/user-panel/wishlist_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -7,6 +9,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'book_details.dart';
+import 'bottom.dart';
 
 class HomeScreenContent extends StatefulWidget {
   const HomeScreenContent({super.key});
@@ -16,11 +19,12 @@ class HomeScreenContent extends StatefulWidget {
 }
 
 class _HomeScreenContentState extends State<HomeScreenContent> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 0; // Track active tab
 
   final List<Widget> _screens = [
-    const HomeTab(),
-     WishlistScreen(), // ✅ Use const if no internal state
+    HomeTab(),
+    WishlistScreen(),
+    TrackOrderScreen(),
     UserProfileScreen(),
   ];
 
@@ -28,6 +32,9 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
     setState(() {
       _selectedIndex = index;
     });
+
+    // Navigation using Get.to
+    Get.to(_screens[index]);
   }
 
   @override
@@ -36,12 +43,6 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
       appBar: AppBar(
         title: const Text("Book Store"),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              // TODO: Navigate to search screen
-            },
-          ),
           IconButton(
             icon: const Icon(Icons.shopping_cart),
             onPressed: () {
@@ -53,13 +54,26 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
       body: _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.grey,
+        onTap: _onItemTapped, // Handle tab switch
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Wishlist"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home', // Label added
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: 'Wishlist', // Label added
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shop),
+            label: 'Orders', // Label added
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile', // Label added
+          ),
         ],
       ),
     );
@@ -71,7 +85,8 @@ class HomeTab extends StatelessWidget {
 
   Future<List<String>> fetchCategories() async {
     try {
-      final snapshot = await FirebaseFirestore.instance.collection('category').get();
+      final snapshot =
+          await FirebaseFirestore.instance.collection('category').get();
       return snapshot.docs.map((doc) => doc['name'].toString()).toList();
     } catch (e) {
       return [];
@@ -85,7 +100,10 @@ class HomeTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Categories", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text(
+            "Categories",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 8),
           FutureBuilder<List<String>>(
             future: fetchCategories(),
@@ -101,18 +119,22 @@ class HomeTab extends StatelessWidget {
               return SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
-                  children: categories.map((category) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: Chip(label: Text(category)),
-                    );
-                  }).toList(),
+                  children:
+                      categories.map((category) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: Chip(label: Text(category)),
+                        );
+                      }).toList(),
                 ),
               );
             },
           ),
           const SizedBox(height: 20),
-          const Text("New Arrivals", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text(
+            "New Arrivals",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 8),
           _buildBookGrid(),
         ],
@@ -162,15 +184,16 @@ class HomeTab extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => BookDetailScreen(
-              title: title,
-              author: author,
-              category: category,
-              rating: rating,
-              price: price,
-              imageUrl: image,
-              description: description,
-            ),
+            builder:
+                (context) => BookDetailScreen(
+                  title: title,
+                  author: author,
+                  category: category,
+                  rating: rating,
+                  price: price,
+                  imageUrl: image,
+                  description: description,
+                ),
           ),
         );
       },
@@ -186,9 +209,19 @@ class HomeTab extends StatelessWidget {
             _buildBookImage(image),
             Padding(
               padding: const EdgeInsets.all(5.0),
-              child: Text(title, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
-            Text("\$ $price", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+            Text(
+              "\$ $price",
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
+              ),
+            ),
           ],
         ),
       ),
@@ -204,7 +237,11 @@ class HomeTab extends StatelessWidget {
         height: 80,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          return const Icon(Icons.broken_image, size: 50, color: Colors.redAccent);
+          return const Icon(
+            Icons.broken_image,
+            size: 50,
+            color: Colors.redAccent,
+          );
         },
       );
     } else {
@@ -215,7 +252,11 @@ class HomeTab extends StatelessWidget {
           child: Image.memory(bytes, height: 80, fit: BoxFit.cover),
         );
       } catch (e) {
-        return const Icon(Icons.broken_image, size: 50, color: Colors.redAccent);
+        return const Icon(
+          Icons.broken_image,
+          size: 50,
+          color: Colors.redAccent,
+        );
       }
     }
   }

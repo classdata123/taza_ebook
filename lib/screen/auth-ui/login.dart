@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ebookapp/screen/admin-panel/admindashboard.dart';
 import 'package:ebookapp/screen/home/home.dart';
-import 'package:ebookapp/utility/app_content.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -33,10 +32,6 @@ class _LoginScreenState extends State<LoginScreen> {
           appBar: AppBar(
             backgroundColor: Colors.white,
             elevation: 0,
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () => Get.back(),
-            ),
           ),
           body: Center(
             child: SingleChildScrollView(
@@ -60,15 +55,19 @@ class _LoginScreenState extends State<LoginScreen> {
                       width: double.infinity,
                       height: 50,
                       child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
                         onPressed: loginWithEmail,
-                        child: Text("Login", style: TextStyle(color: Colors.white)),
+                        child: Text("Login", style: TextStyle(color: Colors.white, fontSize: 16)),
                       ),
                     ),
                     SizedBox(height: 12),
                     Text("or"),
                     SizedBox(height: 12),
-                    // ✅ Google Sign-In Button
                     SizedBox(
                       width: double.infinity,
                       height: 50,
@@ -111,7 +110,6 @@ class _LoginScreenState extends State<LoginScreen> {
         Get.snackbar("Error", "User record not found", backgroundColor: Colors.red);
         return;
       }
-
       bool isAdmin = doc['isAdmin'] ?? false;
       Get.offAll(() => isAdmin ? AdminDashboard() : HomeScreenContent());
       Get.snackbar("Success", "Login Successful!", backgroundColor: Colors.green, colorText: Colors.white);
@@ -138,7 +136,6 @@ class _LoginScreenState extends State<LoginScreen> {
       final userDoc = await docRef.get();
 
       if (!userDoc.exists) {
-        // Add user to DB
         await docRef.set({
           'uid': user.uid,
           'name': user.displayName ?? '',
@@ -148,7 +145,6 @@ class _LoginScreenState extends State<LoginScreen> {
           'phone': '',
         });
       }
-
       Get.offAll(() => HomeScreenContent());
       Get.snackbar("Success", "Logged in with Google", backgroundColor: Colors.green, colorText: Colors.white);
     } catch (e) {

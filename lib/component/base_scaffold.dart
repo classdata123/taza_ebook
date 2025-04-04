@@ -3,6 +3,8 @@ import 'package:ebookapp/component/global_app_bar.dart';
 import 'package:ebookapp/screen/Home/home.dart';
 import 'package:ebookapp/screen/admin-panel/Product.dart';
 import 'package:ebookapp/screen/admin-panel/category.dart';
+import 'package:ebookapp/screen/admin-panel/productdisplay.dart';
+import 'package:ebookapp/screen/admin-panel/show_order.dart';
 import 'package:ebookapp/screen/admin-panel/userdetail.dart';
 import 'package:ebookapp/screen/auth-ui/login.dart';
 import 'package:ebookapp/utility/app_content.dart';
@@ -61,7 +63,7 @@ class _DrawState extends State<Draw> {
   Future<void> fetchUserData() async {
     try {
       QuerySnapshot querySnapshot =
-          await db.collection('users').where('uId', isEqualTo: user!.uid).get();
+          await db.collection('users').where('uid', isEqualTo: user!.uid).get();
 
       if (querySnapshot.docs.isNotEmpty) {
         setState(() {
@@ -186,7 +188,7 @@ class _DrawState extends State<Draw> {
                   MaterialPageRoute(
                     builder:
                         (context) =>
-                            AdminUsersDashboard(), // Replace with your actual Product screen widget
+                            BookDisplayPage(), // Replace with your actual Product screen widget
                   ),
                 );
                 // Add navigation logic here
@@ -207,7 +209,7 @@ class _DrawState extends State<Draw> {
                   MaterialPageRoute(
                     builder:
                         (context) =>
-                            AdminUsersDashboard(), // Replace with your actual Product screen widget
+                            OrdersScreen(), // Replace with your actual Product screen widget
                   ),
                 );
                 // Add navigation logic here

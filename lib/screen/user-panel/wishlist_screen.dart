@@ -1,9 +1,12 @@
 import 'package:ebookapp/screen/Home/Book_details.dart';
+import 'package:ebookapp/screen/Home/bottom.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:ebookapp/controller/cart_controller.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 
 class WishlistScreen extends StatelessWidget {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -80,6 +83,32 @@ class WishlistScreen extends StatelessWidget {
           );
         },
       ),
+            bottomNavigationBar: bottom(),
     );
   }
 }
+ Widget _buildBookImage(String image) {
+    if (image.isEmpty) {
+      return const Icon(Icons.book, size: 50);
+    } else if (image.startsWith("http")) {
+      return Image.network(
+        image,
+        height: 80,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return const Icon(Icons.broken_image, size: 50, color: Colors.redAccent);
+        },
+      );
+    } else {
+      try {
+        Uint8List bytes = base64Decode(image);
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Image.memory(bytes, height: 80, fit: BoxFit.cover),
+        );
+      } catch (e) {
+        return const Icon(Icons.broken_image, size: 50, color: Colors.redAccent);
+      }
+    }
+  }
+

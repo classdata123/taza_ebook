@@ -1,3 +1,4 @@
+import 'package:ebookapp/utility/app_content.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
@@ -18,6 +19,7 @@ class _CategoryPage extends State<CategoryPage> {
   TextEditingController bookname = TextEditingController();
   TextEditingController price = TextEditingController();
   TextEditingController description = TextEditingController();
+  TextEditingController authorr = TextEditingController();
   TextEditingController category = TextEditingController();
 
   Future<void> pickImage(ImageSource source) async {
@@ -47,6 +49,7 @@ class _CategoryPage extends State<CategoryPage> {
       'name': bookname.text,
       'price': price.text,
       'description': description.text,
+      'author': category.text,
       'category': category.text,
       'image': base64Image,
     });
@@ -61,7 +64,7 @@ class _CategoryPage extends State<CategoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppConstant.appMainColor,
       appBar: AppBar(
         title: Text("Add Book", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
@@ -74,6 +77,7 @@ class _CategoryPage extends State<CategoryPage> {
             _buildTextField(bookname, "Book Name"),
             _buildTextField(price, "Price"),
             _buildTextField(description, "Description"),
+            _buildTextField(authorr, "author"),
             _buildTextField(category, "Category"),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
@@ -89,6 +93,7 @@ class _CategoryPage extends State<CategoryPage> {
                     'Bookname': bookname.text,
                     'price': price.text,
                     'description': description.text,
+                    'author': category.text,
                     'category': category.text,
                     'image': base64Image,
                   });
@@ -126,7 +131,7 @@ class _CategoryPage extends State<CategoryPage> {
                               style: TextStyle(color: Colors.white),
                             ),
                             subtitle: Text(
-                              "${doc['price']} - ${doc['description']} - ${doc['category']}",
+                              "${doc['price']} - ${doc['description']} - ${doc['category']} -${doc['author']}",
                               style: TextStyle(color: Colors.white70),
                             ),
                             trailing: Row(
@@ -138,6 +143,7 @@ class _CategoryPage extends State<CategoryPage> {
                                     bookname.text = doc['Bookname'];
                                     price.text = doc['price'];
                                     description.text = doc['description'];
+                                    authorr.text = doc['author'];
                                     category.text = doc['category'];
                                     base64Image = doc['image'];
                                     updateBook(doc.id);
