@@ -1,3 +1,4 @@
+import 'package:ebookapp/utility/app_content.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
@@ -61,7 +62,7 @@ class _CategoryPage extends State<CategoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppConstant.appMainColor,
       appBar: AppBar(
         title: Text("Add Book", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
