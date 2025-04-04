@@ -1,3 +1,4 @@
+import 'package:ebookapp/screen/user-panel/order_show.dart';
 import 'package:ebookapp/screen/user-panel/profile_screen.dart';
 import 'package:ebookapp/screen/user-panel/wishlist_screen.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'book_details.dart';
+import 'bottom.dart';
 
 class HomeScreenContent extends StatefulWidget {
   const HomeScreenContent({super.key});
@@ -16,11 +18,13 @@ class HomeScreenContent extends StatefulWidget {
 }
 
 class _HomeScreenContentState extends State<HomeScreenContent> {
-  int _selectedIndex = 0;
+
+   int _selectedIndex = 0; // Track active tab
 
   final List<Widget> _screens = [
-    const HomeTab(),
-     WishlistScreen(), // ✅ Use const if no internal state
+    HomeTab(),
+    WishlistScreen(),
+    OrderShow(),
     UserProfileScreen(),
   ];
 
@@ -28,6 +32,9 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
     setState(() {
       _selectedIndex = index;
     });
+
+    // Navigation using Get.to
+    Get.to(_screens[index]);
   }
 
   @override
@@ -36,12 +43,6 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
       appBar: AppBar(
         title: const Text("Book Store"),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              // TODO: Navigate to search screen
-            },
-          ),
           IconButton(
             icon: const Icon(Icons.shopping_cart),
             onPressed: () {
@@ -52,16 +53,29 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
       ),
       body: _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Wishlist"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-        ],
-      ),
+      currentIndex: _selectedIndex,
+      selectedItemColor: Colors.black,
+      unselectedItemColor: Colors.grey,
+      onTap: _onItemTapped, // Handle tab switch
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Home', // Label added
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.favorite),
+          label: 'Wishlist', // Label added
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.shop),
+          label: 'Orders', // Label added
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'Profile', // Label added
+        ),       
+      ],
+    ),
     );
   }
 }

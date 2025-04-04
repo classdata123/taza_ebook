@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ebookapp/component/global_app_bar.dart';
+import 'package:ebookapp/screen/Home/bottom.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -175,7 +176,7 @@ class _AddToCartPageState extends State<AddToCartPage> {
           );
         },
       ),
-    
+          bottomNavigationBar: bottom(),
     );
   }
 }

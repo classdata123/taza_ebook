@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (FirebaseAuth.instance.currentUser != null) {
         Get.offNamed("/home");
       } else {
-        Get.offNamed("/register");
+        Get.offNamed("/login");
       }
     });
   }
