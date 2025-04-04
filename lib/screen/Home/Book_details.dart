@@ -170,7 +170,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           ],
         ),
       ),
-          bottomNavigationBar: bottom(),
+          bottomNavigationBar: BottomNavBar(),
     );
   }
 }

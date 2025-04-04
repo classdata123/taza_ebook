@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'book_details.dart';
 import 'bottom.dart';
 

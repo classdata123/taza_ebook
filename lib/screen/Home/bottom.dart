@@ -1,63 +1,50 @@
-import 'package:ebookapp/screen/Home/home.dart';
-import 'package:ebookapp/screen/Home/search_filter.dart';
-import 'package:ebookapp/screen/user-panel/order_show.dart';
-import 'package:ebookapp/screen/user-panel/profile_screen.dart';
-import 'package:ebookapp/screen/user-panel/wishlist_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
+import 'package:ebookapp/screen/Home/home.dart';
+import 'package:ebookapp/screen/user-panel/wishlist_screen.dart';
+import 'package:ebookapp/screen/user-panel/order_show.dart';
+import 'package:ebookapp/screen/user-panel/profile_screen.dart';
 
-
-class bottom extends StatefulWidget {
-  const bottom({super.key});
-
-  @override
-  State<bottom> createState() => _BottomState();
-}
-
-class _BottomState extends State<bottom> {
-   int _selectedIndex = 0; // Track active tab
+class BottomNavBar extends StatelessWidget {
+  final RxInt selectedIndex = 0.obs; // Using GetX for reactive state
 
   final List<Widget> _screens = [
     HomeScreenContent(),
     WishlistScreen(),
-    UserProfileScreen(),
     OrderShow(),
+    UserProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    // Navigation using Get.to
-    Get.to(_screens[index]);
+    selectedIndex.value = index;
+    Get.offAll(() => _screens[index], transition: Transition.fadeIn); // Replaces current screen
   }
+
   @override
   Widget build(BuildContext context) {
-    return  BottomNavigationBar(
-      currentIndex: _selectedIndex,
-      selectedItemColor: Colors.black,
-      unselectedItemColor: Colors.grey,
-      onTap: _onItemTapped, // Handle tab switch
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home', // Label added
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.favorite),
-          label: 'Wishlist', // Label added
-        ),
-          BottomNavigationBarItem(
-          icon: Icon(Icons.shop),
-          label: 'Orders', // Label added
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'Profile', // Label added
-        ),     
-      ],
-    );
+    return Obx(() => BottomNavigationBar(
+          currentIndex: selectedIndex.value,
+          selectedItemColor: Colors.black,
+          unselectedItemColor: Colors.grey,
+          onTap: _onItemTapped,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.favorite),
+              label: 'Wishlist',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.shop),
+              label: 'Orders',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Profile',
+            ),
+          ],
+        ));
   }
 }

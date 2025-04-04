@@ -81,7 +81,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           },
         ),
       ),
-            bottomNavigationBar: bottom(),
+            bottomNavigationBar: BottomNavBar(),
     );
   }
 
