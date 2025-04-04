@@ -3,7 +3,8 @@ import 'package:ebookapp/screen/auth-ui/splashscreen.dart';
 import 'package:ebookapp/screen/auth-ui/register.dart';
 import 'package:ebookapp/screen/auth-ui/login.dart';
 import 'package:ebookapp/screen/home/home.dart';
-import 'package:ebookapp/screen/home/cart.dart';            // ✅ Cart Screen
+import 'package:ebookapp/screen/home/cart.dart'; // ✅ Cart Screen
+import 'package:ebookapp/screen/user-panel/trackorder.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,9 +12,7 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // ✅ Register cart controller globally
   Get.put(CartController());

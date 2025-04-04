@@ -1,43 +1,29 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class OrdersScreen extends StatelessWidget {
   const OrdersScreen({super.key});
 
-  Stream<List<Map<String, dynamic>>> fetchOrders() {
-    final User? user = FirebaseAuth.instance.currentUser;
+  Stream<QuerySnapshot> fetchOrders() {
+    return FirebaseFirestore.instance.collection('orders').snapshots();
+  }
 
-    if (user == null) {
-      print("❌ User not logged in.");
-      return Stream.value([]);
-    }
-
-    print("📡 Fetching orders for user: ${user.uid}");
-
-    return FirebaseFirestore.instance
-        .collection('orders')
-        .where('userId', isEqualTo: user.uid)
-        .snapshots()
-        .map((snapshot) {
-          print("📦 Orders Fetched: ${snapshot.docs.length}");
-          return snapshot.docs.map((doc) {
-            print("✅ Order Data: ${doc.data()}");
-            return doc.data();
-          }).toList();
-        });
+  Future<void> updateStatus(String docId, String newStatus) async {
+    await FirebaseFirestore.instance.collection('orders').doc(docId).update({
+      'status': newStatus,
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Your Orders"),
+        title: const Text("All Orders"),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
       ),
-      body: StreamBuilder<List<Map<String, dynamic>>>(
+      body: StreamBuilder<QuerySnapshot>(
         stream: fetchOrders(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -47,8 +33,7 @@ class OrdersScreen extends StatelessWidget {
           }
 
           if (snapshot.hasError) {
-            print("❌ Error fetching orders: ${snapshot.error}");
-            return Center(
+            return const Center(
               child: Text(
                 "Error loading orders",
                 style: TextStyle(color: Colors.red),
@@ -56,8 +41,7 @@ class OrdersScreen extends StatelessWidget {
             );
           }
 
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            print("⚠ No Orders Found");
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(
               child: Text(
                 "No Orders Found",
@@ -66,28 +50,78 @@ class OrdersScreen extends StatelessWidget {
             );
           }
 
-          final orders = snapshot.data!;
+          final orders = snapshot.data!.docs;
 
           return ListView.builder(
             itemCount: orders.length,
             itemBuilder: (context, index) {
               final order = orders[index];
+              final data = order.data() as Map<String, dynamic>;
 
               return Card(
                 color: Colors.white,
                 margin: const EdgeInsets.all(10),
-                child: ListTile(
-                  title: Text(
-                    "Order #${index + 1}",
-                    style: const TextStyle(color: Colors.black),
-                  ),
-                  subtitle: Text(
-                    "Total: \$${order['totalPrice']}",
-                    style: const TextStyle(color: Colors.black),
-                  ),
-                  trailing: Text(
-                    order['status'],
-                    style: const TextStyle(color: Colors.green),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "📦 Order ID: ${data['orderId'] ?? 'N/A'}",
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      Text("🔗 Tracking ID: ${data['trackingId']}"),
+                      Text("📞 Phone: ${data['phone']}"),
+                      Text("🏠 Address: ${data['address']}"),
+                      const SizedBox(height: 6),
+                      const Text(
+                        "🛒 Items:",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      ...List<Widget>.from(
+                        (data['products'] as List).map((item) {
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(child: Text(item['title'] ?? '')),
+                              Text("x${item['quantity']}"),
+                              Text("\$${item['price'].toStringAsFixed(2)}"),
+                            ],
+                          );
+                        }),
+                      ),
+                      const Divider(height: 20),
+                      Text("💰 Total: \$${data['totalPrice']}"),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("📍 Status:"),
+                          DropdownButton<String>(
+                            value: data['status'],
+                            items:
+                                [
+                                      'pending',
+                                      'processing',
+                                      'shipped',
+                                      'delivered',
+                                    ]
+                                    .map(
+                                      (status) => DropdownMenuItem(
+                                        value: status,
+                                        child: Text(status),
+                                      ),
+                                    )
+                                    .toList(),
+                            onChanged: (value) {
+                              if (value != null) {
+                                updateStatus(order.id, value);
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               );
