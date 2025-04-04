@@ -10,31 +10,51 @@ class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Your Cart")),
+      appBar: AppBar(
+        title: const Text("Your Cart"),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+      ),
       body: Obx(() {
         if (cartController.cartItems.isEmpty) {
-          return const Center(child: Text("Your cart is empty."));
+          return const Center(
+            child: Text(
+              "Your cart is empty.",
+              style: TextStyle(color: Colors.black),
+            ),
+          );
         }
         return ListView.builder(
           itemCount: cartController.cartItems.length,
           itemBuilder: (context, index) {
             final item = cartController.cartItems[index];
             return Card(
+              color: Colors.white,
               margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               child: ListTile(
-                leading: const Icon(Icons.book),
-                title: Text(item['title']),
-                subtitle: Text("\$${item['price'].toStringAsFixed(2)}"),
+                leading: const Icon(Icons.book, color: Colors.black),
+                title: Text(
+                  item['title'],
+                  style: const TextStyle(color: Colors.black),
+                ),
+                subtitle: Text(
+                  "\$${item['price'].toStringAsFixed(2)}",
+                  style: const TextStyle(color: Colors.black),
+                ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.remove),
+                      icon: const Icon(Icons.remove, color: Colors.black),
                       onPressed: () => cartController.updateQuantity(index, -1),
                     ),
-                    Obx(() => Text('${cartController.cartItems[index]['quantity']}')), // ✅ Quantity Updates
+                    Text(
+                      '${item['quantity']}',
+                      style: const TextStyle(color: Colors.black),
+                    ), // ✅ Quantity Updates
                     IconButton(
-                      icon: const Icon(Icons.add),
+                      icon: const Icon(Icons.add, color: Colors.black),
                       onPressed: () => cartController.updateQuantity(index, 1),
                     ),
                   ],
@@ -51,6 +71,7 @@ class CartScreen extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
+            color: Colors.white,
             border: Border(top: BorderSide(color: Colors.grey.shade300)),
           ),
           child: Column(
@@ -61,7 +82,11 @@ class CartScreen extends StatelessWidget {
                 children: [
                   const Text(
                     "Total:",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
                   ),
                   Text(
                     "\$${cartController.totalPrice.value.toStringAsFixed(2)}",
@@ -77,8 +102,20 @@ class CartScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+                  onPressed: () async {
+                    await cartController
+                        .placeOrder(); // ✅ Fixed order placement
+                    Get.snackbar(
+                      "Success",
+                      "Order placed successfully!",
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.green,
+                      colorText: Colors.white,
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                  ),
                   child: const Text("Proceed to Checkout"),
                 ),
               ),
