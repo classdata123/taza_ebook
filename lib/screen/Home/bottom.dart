@@ -11,7 +11,7 @@ class BottomNavBar extends StatelessWidget {
   final List<Widget> _screens = [
     HomeScreenContent(),
     WishlistScreen(),
-    OrderShow(),
+    OrdersScreen(),
     UserProfileScreen(),
   ];
 

@@ -1,4 +1,5 @@
 import 'package:ebookapp/controller/cart_controller.dart';
+import 'package:ebookapp/screen/user-panel/order_show.dart'; // 👈 Import your order screen
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
@@ -14,69 +15,72 @@ class CartScreen extends StatelessWidget {
   void showCheckoutForm(BuildContext context) {
     showDialog(
       context: context,
-      builder:
-          (_) => AlertDialog(
-            title: const Text("Enter Delivery Details"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: phoneController,
-                  keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(labelText: "Phone Number"),
-                ),
-                TextField(
-                  controller: addressController,
-                  maxLines: 2,
-                  decoration: const InputDecoration(labelText: "Address"),
-                ),
-              ],
+      builder: (_) => AlertDialog(
+        title: const Text("Enter Delivery Details"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: phoneController,
+              keyboardType: TextInputType.phone,
+              decoration: const InputDecoration(labelText: "Phone Number"),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Get.back(),
-                child: const Text("Cancel"),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  final phone = phoneController.text.trim();
-                  final address = addressController.text.trim();
-
-                  if (phone.isEmpty || address.isEmpty) {
-                    Get.snackbar(
-                      "Missing Info",
-                      "Please fill in all fields",
-                      backgroundColor: Colors.red,
-                      colorText: Colors.white,
-                    );
-                    return;
-                  }
-
-                  final orderId =
-                      DateTime.now().millisecondsSinceEpoch
-                          .toString(); // unique
-                  final trackingId = const Uuid().v4(); // unique
-
-                  await cartController.placeOrder(
-                    address: address,
-                    phone: phone,
-                    orderId: orderId,
-                    trackingId: trackingId,
-                  );
-
-                  Get.back(); // Close the dialog
-                  Get.snackbar(
-                    "Success",
-                    "Order placed successfully!",
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: Colors.green,
-                    colorText: Colors.white,
-                  );
-                },
-                child: const Text("Place Order"),
-              ),
-            ],
+            TextField(
+              controller: addressController,
+              maxLines: 2,
+              decoration: const InputDecoration(labelText: "Address"),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text("Cancel"),
           ),
+          ElevatedButton(
+            onPressed: () async {
+              final phone = phoneController.text.trim();
+              final address = addressController.text.trim();
+
+              if (phone.isEmpty || address.isEmpty) {
+                Get.snackbar(
+                  "Missing Info",
+                  "Please fill in all fields",
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+                return;
+              }
+
+              final orderId = DateTime.now().millisecondsSinceEpoch.toString();
+              final trackingId = const Uuid().v4();
+
+              await cartController.placeOrder(
+                address: address,
+                phone: phone,
+                orderId: orderId,
+                trackingId: trackingId,
+              );
+
+              Get.back(); // Close the dialog
+
+              Get.snackbar(
+                "Success",
+                "Order placed successfully!",
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: Colors.green,
+                colorText: Colors.white,
+              );
+
+              // 🔁 Redirect to Order Screen
+              Future.delayed(const Duration(milliseconds: 500), () {
+                Get.off(() => const OrdersScreen()); // Replaces current screen
+              });
+            },
+            child: const Text("Place Order"),
+          ),
+        ],
+      ),
     );
   }
 

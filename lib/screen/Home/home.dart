@@ -23,8 +23,9 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
   final List<Widget> _screens = [
     HomeTab(),
     WishlistScreen(),
-    TrackOrderScreen(),
+    // TrackOrderScreen(),
     UserProfileScreen(),
+    OrdersScreen(),
   ];
 
   void _onItemTapped(int index) {
