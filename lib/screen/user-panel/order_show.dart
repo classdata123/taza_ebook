@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:ebookapp/screen/Home/bottom.dart'; // Assuming BottomNavBar is in this file
 
 class OrdersScreen extends StatelessWidget {
   const OrdersScreen({super.key});
@@ -22,6 +23,12 @@ class OrdersScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);  // Back to previous screen
+          },
+        ),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: fetchOrders(),
@@ -99,20 +106,19 @@ class OrdersScreen extends StatelessWidget {
                           const Text("📍 Status:"),
                           DropdownButton<String>(
                             value: data['status'],
-                            items:
-                                [
-                                      'pending',
-                                      'processing',
-                                      'shipped',
-                                      'delivered',
-                                    ]
-                                    .map(
-                                      (status) => DropdownMenuItem(
-                                        value: status,
-                                        child: Text(status),
-                                      ),
-                                    )
-                                    .toList(),
+                            items: [
+                              'pending',
+                              'processing',
+                              'shipped',
+                              'delivered',
+                            ]
+                                .map(
+                                  (status) => DropdownMenuItem(
+                                    value: status,
+                                    child: Text(status),
+                                  ),
+                                )
+                                .toList(),
                             onChanged: (value) {
                               if (value != null) {
                                 updateStatus(order.id, value);
@@ -129,6 +135,7 @@ class OrdersScreen extends StatelessWidget {
           );
         },
       ),
+      bottomNavigationBar: BottomNavBar(), // Your bottom navigation bar
     );
   }
 }
