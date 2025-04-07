@@ -19,7 +19,7 @@ class OrdersScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("All Orders"),
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.black,
         foregroundColor: Colors.black,
         elevation: 0,
       ),
