@@ -1,5 +1,4 @@
 import 'package:ebookapp/controller/cart_controller.dart';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:math';
@@ -41,6 +40,14 @@ class CartScreen extends StatelessWidget {
           itemCount: cartController.cartItems.length,
           itemBuilder: (context, index) {
             final item = cartController.cartItems[index];
+            // Ensuring price is a valid number (either int or double)
+            double price = 0.0;
+            if (item['price'] is String) {
+              price = double.tryParse(item['price']) ?? 0.0; // Convert string to double
+            } else if (item['price'] is num) {
+              price = item['price'].toDouble(); // Convert to double if it's a number
+            }
+            
             return Card(
               color: Colors.white,
               margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -51,7 +58,7 @@ class CartScreen extends StatelessWidget {
                   style: const TextStyle(color: Colors.black),
                 ),
                 subtitle: Text(
-                  "\$${item['price'].toStringAsFixed(2)}",
+                  "\${price.toStringAsFixed(2)}", // Ensuring price is displayed
                   style: const TextStyle(color: Colors.black),
                 ),
                 trailing: Row(
@@ -80,6 +87,18 @@ class CartScreen extends StatelessWidget {
         if (cartController.cartItems.isEmpty) {
           return const SizedBox.shrink();
         }
+        // Calculate total price
+        double totalPrice = 0.0;
+        for (var item in cartController.cartItems) {
+          double price = 0.0;
+          if (item['price'] is String) {
+            price = double.tryParse(item['price']) ?? 0.0;
+          } else if (item['price'] is num) {
+            price = item['price'].toDouble();
+          }
+          totalPrice += price * item['quantity'];
+        }
+
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -101,7 +120,7 @@ class CartScreen extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "\$${cartController.totalPrice.value.toStringAsFixed(2)}",
+                    "\${totalPrice.toStringAsFixed(2)}", // Displaying the total price
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

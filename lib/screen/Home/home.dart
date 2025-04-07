@@ -63,10 +63,10 @@ class _HomeTabState extends State<HomeTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Categories",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
+          // const Text(
+          //   "Categories",
+          //   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          // ),
           const SizedBox(height: 8),
           FutureBuilder<List<String>>(
             future: fetchCategories(),
