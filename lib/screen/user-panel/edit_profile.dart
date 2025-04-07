@@ -97,7 +97,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
         ),
       ),
-            bottomNavigationBar: bottom(),
+            bottomNavigationBar: BottomNavBar(),
     );
   }
 

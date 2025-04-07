@@ -1,4 +1,3 @@
-import 'package:ebookapp/screen/Home/Book_details.dart';
 import 'package:ebookapp/screen/Home/bottom.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -22,7 +21,9 @@ class WishlistScreen extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot>(
         stream: _db.collection('users').doc(uid).collection('wishlist').snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(child: Text("Your wishlist is empty."));
@@ -36,44 +37,64 @@ class WishlistScreen extends StatelessWidget {
               final item = wishlist[index].data() as Map<String, dynamic>;
               final docId = wishlist[index].id;
 
+              print("✅ Image URL: ${item['image']}"); // Debugging image URL
+
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                child: ListTile(
-                  leading: item['image'] != null && item['image'].toString().isNotEmpty
-                      ? Image.network(item['image'], width: 50, fit: BoxFit.cover)
-                      : const Icon(Icons.book, size: 40),
-                  title: Text(item['title'] ?? 'Unknown Title'),
-                  subtitle: Text("by ${item['author'] ?? 'Unknown'}\n\$${item['price'] ?? '0.00'}"),
-                  isThreeLine: true,
-                  trailing: Column(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.shopping_cart),
-                        onPressed: () {
-                          cartController.addToCart({
-                            'title': item['title'],
-                            'author': item['author'],
-                            'price': double.tryParse(item['price'].toString()) ?? 0.0,
-                            'image': item['image'],
-                          });
-
-                          Get.snackbar("Success", "Added to cart",
-                              backgroundColor: Colors.green, colorText: Colors.white);
-                        },
+                      _buildBookImage(item['image'] ?? ''),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item['title'] ?? 'Unknown Title',
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              "by ${item['author'] ?? 'Unknown'}",
+                              style: const TextStyle(color: Colors.grey),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              "\$${item['price'] ?? '0.00'}",
+                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () {
-                          _db
-                              .collection('users')
-                              .doc(uid)
-                              .collection('wishlist')
-                              .doc(docId)
-                              .delete();
+                      Column(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.shopping_cart),
+                            onPressed: () {
+                              cartController.addToCart({
+                                'title': item['title'],
+                                'author': item['author'],
+                                'price': double.tryParse(item['price'].toString()) ?? 0.0,
+                                'image': item['image'],
+                              });
 
-                          Get.snackbar("Removed", "Book removed from wishlist",
-                              backgroundColor: Colors.red, colorText: Colors.white);
-                        },
+                              Get.snackbar("Success", "Added to cart",
+                                  backgroundColor: Colors.green, colorText: Colors.white);
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              _db.collection('users').doc(uid).collection('wishlist').doc(docId).delete();
+
+                              Get.snackbar("Removed", "Book removed from wishlist",
+                                  backgroundColor: Colors.red, colorText: Colors.white);
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -83,32 +104,41 @@ class WishlistScreen extends StatelessWidget {
           );
         },
       ),
-            bottomNavigationBar: bottom(),
+      bottomNavigationBar: BottomNavBar(),
     );
   }
-}
- Widget _buildBookImage(String image) {
-    if (image.isEmpty) {
+
+  /// 🖼 **Updated Image Widget**
+  Widget _buildBookImage(String? image) {
+    if (image == null || image.isEmpty) {
       return const Icon(Icons.book, size: 50);
-    } else if (image.startsWith("http")) {
-      return Image.network(
-        image,
-        height: 80,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return const Icon(Icons.broken_image, size: 50, color: Colors.redAccent);
-        },
+    }
+
+    if (image.startsWith("http")) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.network(
+          image,
+          width: 60,
+          height: 80,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            print("❌ Image load failed: $image");
+            return const Icon(Icons.broken_image, size: 50, color: Colors.redAccent);
+          },
+        ),
       );
-    } else {
-      try {
-        Uint8List bytes = base64Decode(image);
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Image.memory(bytes, height: 80, fit: BoxFit.cover),
-        );
-      } catch (e) {
-        return const Icon(Icons.broken_image, size: 50, color: Colors.redAccent);
-      }
+    }
+
+    try {
+      Uint8List bytes = base64Decode(image);
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.memory(bytes, width: 60, height: 80, fit: BoxFit.cover),
+      );
+    } catch (e) {
+      print("❌ Image decoding error: $e");
+      return const Icon(Icons.broken_image, size: 50, color: Colors.redAccent);
     }
   }
-
+}

@@ -1,41 +1,13 @@
-import 'package:ebookapp/screen/user-panel/order_show.dart';
-import 'package:ebookapp/screen/user-panel/profile_screen.dart';
-import 'package:ebookapp/screen/user-panel/trackorder.dart';
-import 'package:ebookapp/screen/user-panel/wishlist_screen.dart';
+import 'package:ebookapp/screen/Home/Book_details.dart';
+import 'package:ebookapp/screen/Home/bottom.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'book_details.dart';
-import 'bottom.dart';
-
-class HomeScreenContent extends StatefulWidget {
+class HomeScreenContent extends StatelessWidget {
   const HomeScreenContent({super.key});
-
-  @override
-  State<HomeScreenContent> createState() => _HomeScreenContentState();
-}
-
-class _HomeScreenContentState extends State<HomeScreenContent> {
-  int _selectedIndex = 0; // Track active tab
-
-  final List<Widget> _screens = [
-    HomeTab(),
-    WishlistScreen(),
-    TrackOrderScreen(),
-    UserProfileScreen(),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    // Navigation using Get.to
-    Get.to(_screens[index]);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,47 +18,38 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
           IconButton(
             icon: const Icon(Icons.shopping_cart),
             onPressed: () {
-              Get.toNamed('/cart'); // Make sure this route exists
+              Get.toNamed('/cart');
             },
           ),
         ],
       ),
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped, // Handle tab switch
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home', // Label added
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Wishlist', // Label added
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shop),
-            label: 'Orders', // Label added
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile', // Label added
-          ),
-        ],
-      ),
+      body: const HomeTab(selectedCategory: ''),
+      bottomNavigationBar: BottomNavBar(),
     );
   }
 }
 
-class HomeTab extends StatelessWidget {
-  const HomeTab({super.key});
+class HomeTab extends StatefulWidget {
+  final String selectedCategory;
+
+  const HomeTab({super.key, required this.selectedCategory});
+
+  @override
+  State<HomeTab> createState() => _HomeTabState();
+}
+
+class _HomeTabState extends State<HomeTab> {
+  String _selectedCategory = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedCategory = widget.selectedCategory;
+  }
 
   Future<List<String>> fetchCategories() async {
     try {
-      final snapshot =
-          await FirebaseFirestore.instance.collection('category').get();
+      final snapshot = await FirebaseFirestore.instance.collection('category').get();
       return snapshot.docs.map((doc) => doc['name'].toString()).toList();
     } catch (e) {
       return [];
@@ -119,13 +82,19 @@ class HomeTab extends StatelessWidget {
               return SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
-                  children:
-                      categories.map((category) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                          child: Chip(label: Text(category)),
-                        );
-                      }).toList(),
+                  children: categories.map((category) {
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedCategory = category;
+                        });
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: Chip(label: Text(category)),
+                      ),
+                    );
+                  }).toList(),
                 ),
               );
             },
@@ -144,7 +113,12 @@ class HomeTab extends StatelessWidget {
 
   Widget _buildBookGrid() {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('books').snapshots(),
+      stream: _selectedCategory.isEmpty
+          ? FirebaseFirestore.instance.collection('books').snapshots()
+          : FirebaseFirestore.instance
+              .collection('books')
+              .where('category', isEqualTo: _selectedCategory)
+              .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
@@ -174,7 +148,6 @@ class HomeTab extends StatelessWidget {
     String title = book['Bookname'] ?? 'No Title';
     String author = book['author'] ?? 'Unknown';
     String category = book['category'] ?? 'N/A';
-    double rating = double.tryParse(book['rating'].toString()) ?? 0.0;
     String price = book['price'] ?? '0';
     String image = book['image'] ?? '';
     String description = book['description'] ?? 'No description available.';
@@ -184,16 +157,14 @@ class HomeTab extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder:
-                (context) => BookDetailScreen(
-                  title: title,
-                  author: author,
-                  category: category,
-                  rating: rating,
-                  price: price,
-                  imageUrl: image,
-                  description: description,
-                ),
+            builder: (context) => BookDetailScreen(
+              title: title,
+              author: author,
+              category: category,
+              price: price,
+              imageUrl: image,
+              description: description,
+            ),
           ),
         );
       },

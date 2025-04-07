@@ -150,7 +150,7 @@ class _UserRequestFormState extends State<UserRequestForm> {
           ],
         ),
       ),
-            bottomNavigationBar: bottom(),
+            bottomNavigationBar: BottomNavBar(),
     );
   }
 

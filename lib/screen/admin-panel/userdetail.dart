@@ -76,10 +76,10 @@ class _AdminUsersDashboardState extends State<AdminUsersDashboard> {
                             user['email'],
                             style: TextStyle(color: Colors.white70),
                           ),
-                          trailing: Text(
-                            "Joined: ${user['registration_date']}",
-                            style: TextStyle(color: Colors.white54),
-                          ),
+                          // trailing: Text(
+                          //   "Joined: ${user['registration_date']}",
+                          //   style: TextStyle(color: Colors.white54),
+                          // ),
                           onTap: () {
                             _showUserDetails(context, user);
                           },
