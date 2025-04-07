@@ -1,14 +1,10 @@
-import 'package:ebookapp/screen/user-panel/order_show.dart';
-import 'package:ebookapp/screen/user-panel/profile_screen.dart';
-import 'package:ebookapp/screen/user-panel/trackorder.dart';
-import 'package:ebookapp/screen/user-panel/wishlist_screen.dart';
+import 'package:ebookapp/screen/Home/Book_details.dart';
+import 'package:ebookapp/screen/Home/bottom.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'book_details.dart';
-import 'bottom.dart';
 
 class HomeScreenContent extends StatelessWidget {
   const HomeScreenContent({super.key});
@@ -152,7 +148,6 @@ class _HomeTabState extends State<HomeTab> {
     String title = book['Bookname'] ?? 'No Title';
     String author = book['author'] ?? 'Unknown';
     String category = book['category'] ?? 'N/A';
-    double rating = double.tryParse(book['rating'].toString()) ?? 0.0;
     String price = book['price'] ?? '0';
     String image = book['image'] ?? '';
     String description = book['description'] ?? 'No description available.';
@@ -166,7 +161,6 @@ class _HomeTabState extends State<HomeTab> {
               title: title,
               author: author,
               category: category,
-              rating: rating,
               price: price,
               imageUrl: image,
               description: description,

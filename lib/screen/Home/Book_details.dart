@@ -14,7 +14,6 @@ class BookDetailScreen extends StatefulWidget {
   final String title;
   final String author;
   final String category;
-  final double rating;
   final String price;
   final String imageUrl;
   final String description;
@@ -24,7 +23,6 @@ class BookDetailScreen extends StatefulWidget {
     required this.title,
     required this.author,
     required this.category,
-    required this.rating,
     required this.price,
     required this.imageUrl,
     required this.description,
@@ -125,9 +123,6 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
                       Text("Category: ${widget.category}",
                           style: const TextStyle(fontSize: 14, color: Colors.grey)),
-                      Text("Rating: ⭐ ${widget.rating}/5",
-                          style: const TextStyle(fontSize: 14)),
-                      const SizedBox(height: 10),
                       Text("Price:",
                           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
                       Text("\$ ${widget.price}",
