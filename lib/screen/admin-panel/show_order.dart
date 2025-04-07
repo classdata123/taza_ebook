@@ -20,7 +20,7 @@ class OrdersScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("All Orders"),
         backgroundColor: Colors.black,
-        foregroundColor: Colors.black,
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: StreamBuilder<QuerySnapshot>(

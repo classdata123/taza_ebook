@@ -1,9 +1,10 @@
 import 'package:ebookapp/component/base_scaffold.dart';
+import 'package:ebookapp/screen/admin-panel/author.dart';
 import 'package:ebookapp/screen/admin-panel/userdetail.dart';
 import 'package:ebookapp/utility/app_content.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:get/get_navigation/get_navigation.dart';
+
 
 class AdminDashboard extends StatelessWidget {
   final FirebaseFirestore db = FirebaseFirestore.instance;
@@ -66,6 +67,12 @@ class AdminDashboard extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => AdminUsersDashboard()),
+              );
+            } else if (title == "Total Authors") {
+              // Navigate to the Author List Page
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AuthorPage()), // Navigate to AuthorPage
               );
             }
           },
