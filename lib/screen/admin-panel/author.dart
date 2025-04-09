@@ -13,10 +13,10 @@ class _AuthorPageState extends State<AuthorPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, // White background
       appBar: AppBar(
-        title: Text("Author Page",style: TextStyle(color: Colors.white),),
+        title: Text("Author Details", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
-        
         iconTheme: IconThemeData(color: Colors.white),
       ),
       body: Padding(
@@ -29,9 +29,11 @@ class _AuthorPageState extends State<AuthorPage> {
                   searchQuery = value.toLowerCase();
                 });
               },
+              style: TextStyle(color: Colors.black),
               decoration: InputDecoration(
                 hintText: "Search by Author or Category",
-                prefixIcon: Icon(Icons.search),
+                hintStyle: TextStyle(color: Colors.grey[600]),
+                prefixIcon: Icon(Icons.search, color: Colors.black),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide.none,
@@ -49,25 +51,29 @@ class _AuthorPageState extends State<AuthorPage> {
                     return Center(child: CircularProgressIndicator());
                   }
 
-                  var books = snapshot.data!.docs.where((doc) {
-                    return doc['author'].toLowerCase().contains(searchQuery) ||
-                        doc['category'].toLowerCase().contains(searchQuery);
-                  }).toList();
+                  var books =
+                      snapshot.data!.docs.where((doc) {
+                        return doc['author'].toLowerCase().contains(
+                              searchQuery,
+                            ) ||
+                            doc['category'].toLowerCase().contains(searchQuery);
+                      }).toList();
 
                   return ListView.builder(
                     itemCount: books.length,
                     itemBuilder: (context, index) {
                       var book = books[index];
                       return Card(
+                        color: Colors.black, // Card black
                         margin: EdgeInsets.symmetric(vertical: 8),
                         child: ListTile(
                           title: Text(
                             book['Bookname'],
-                            style: TextStyle(color: Colors.black),
+                            style: TextStyle(color: Colors.white),
                           ),
                           subtitle: Text(
                             "${book['author']} - ${book['category']}",
-                            style: TextStyle(color: Colors.black87),
+                            style: TextStyle(color: Colors.white70),
                           ),
                           onTap: () {
                             _showBookDetails(context, book);
@@ -90,27 +96,27 @@ class _AuthorPageState extends State<AuthorPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: Colors.white,
-          title: Text("Book Details", style: TextStyle(color: Colors.black)),
+          backgroundColor: Colors.black, // Dialog background black
+          title: Text("Book Details", style: TextStyle(color: Colors.white)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 "Book Name: ${book['Bookname']}",
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(color: Colors.white),
               ),
               Text(
                 "Author: ${book['author']}",
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(color: Colors.white),
               ),
               Text(
                 "Category: ${book['category']}",
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(color: Colors.white),
               ),
               Text(
                 "Description: ${book['description']}",
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(color: Colors.white),
               ),
             ],
           ),
