@@ -176,7 +176,7 @@ class _CategoryPage extends State<CategoryPage> {
       padding: EdgeInsets.only(bottom: 10),
       child: TextField(
         controller: controller,
-        style: TextStyle(color: Colors.black),  // Text color set to black
+        style: TextStyle(color: Colors.white),  // Text color set to white
         decoration: InputDecoration(
           filled: true,
           fillColor: Colors.black,  // Background color of input field set to black
