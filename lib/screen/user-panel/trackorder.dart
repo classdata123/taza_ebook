@@ -12,7 +12,8 @@ class TrackOrderScreen extends StatefulWidget {
 
 class _TrackOrderScreenState extends State<TrackOrderScreen> {
   final TextEditingController _trackingController = TextEditingController();
-  DocumentSnapshot? _orderData;
+  List<DocumentSnapshot>? _ordersData;  // To hold all orders
+  DocumentSnapshot? _orderData;  // To hold specific order
   bool _isLoading = false;
   String? _error;
 
@@ -23,6 +24,7 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
     'delivered',
   ];
 
+  // Fetch a specific order by tracking ID
   Future<void> fetchOrder() async {
     setState(() {
       _isLoading = true;
@@ -31,12 +33,11 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
     });
 
     try {
-      final query =
-          await FirebaseFirestore.instance
-              .collection('orders')
-              .where('trackingId', isEqualTo: _trackingController.text.trim())
-              .limit(1)
-              .get();
+      final query = await FirebaseFirestore.instance
+          .collection('orders')
+          .where('trackingId', isEqualTo: _trackingController.text.trim())
+          .limit(1)
+          .get();
 
       if (query.docs.isNotEmpty) {
         setState(() {
@@ -58,10 +59,45 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
     });
   }
 
+  // Fetch all orders
+  Future<void> fetchAllOrders() async {
+    setState(() {
+      _isLoading = true;
+      _ordersData = null;
+      _error = null;
+    });
+
+    try {
+      final query = await FirebaseFirestore.instance
+          .collection('orders')
+          .get();
+
+      if (query.docs.isNotEmpty) {
+        setState(() {
+          _ordersData = query.docs;
+        });
+      } else {
+        setState(() {
+          _error = "No orders found.";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _error = "Error fetching orders: $e";
+      });
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  // Get status index for step representation
   int getStatusIndex(String status) {
     return _statusSteps.indexOf(status);
   }
 
+  // Widget to display tracking steps
   Widget buildTrackingSteps(String currentStatus) {
     int currentIndex = getStatusIndex(currentStatus);
 
@@ -89,10 +125,9 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
     );
   }
 
-  Widget buildOrderInfo() {
-    if (_orderData == null) return const SizedBox();
-
-    final data = _orderData!.data() as Map<String, dynamic>;
+  // Widget to display order details
+  Widget buildOrderInfo(DocumentSnapshot orderData) {
+    final data = orderData.data() as Map<String, dynamic>;
     final orderDate = (data['orderDate'] as Timestamp).toDate();
     final formattedDate = DateFormat('dd MMM yyyy – hh:mm a').format(orderDate);
 
@@ -107,7 +142,7 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
         Text("🕒 Date: $formattedDate"),
         const SizedBox(height: 10),
         Text(
-          "📍 Current Status:",
+          "📍 Current Status: ${data['status']}",
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 6),
@@ -141,6 +176,18 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
     );
   }
 
+  // Widget to display all orders
+  Widget buildAllOrders() {
+    if (_ordersData == null) return const SizedBox();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: List.generate(_ordersData!.length, (index) {
+        return buildOrderInfo(_ordersData![index]);
+      }),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -170,6 +217,11 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: fetchAllOrders,  // Button to fetch all orders
+              child: const Text("Fetch All Orders"),
+            ),
             if (_isLoading)
               const Padding(
                 padding: EdgeInsets.all(20),
@@ -181,7 +233,8 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
                 child: Text(_error!, style: const TextStyle(color: Colors.red)),
               )
             else
-              buildOrderInfo(),
+              // Display either specific order or all orders
+              _orderData != null ? buildOrderInfo(_orderData!) : buildAllOrders(),
           ],
         ),
       ),

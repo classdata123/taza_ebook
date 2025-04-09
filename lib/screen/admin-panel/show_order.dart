@@ -92,34 +92,56 @@ class OrdersScreen extends StatelessWidget {
                         }),
                       ),
                       const Divider(height: 20),
-                      Text("💰 Total: \$${data['totalPrice']}"),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text("📍 Status:"),
-                          DropdownButton<String>(
-                            value: data['status'],
-                            items:
-                                [
-                                      'pending',
-                                      'processing',
-                                      'shipped',
-                                      'delivered',
-                                    ]
-                                    .map(
-                                      (status) => DropdownMenuItem(
-                                        value: status,
-                                        child: Text(status),
+
+                      // Updated "Total" section with black background and white text
+                      Container(
+                        color: Colors.black,
+                        padding: const EdgeInsets.all(8),
+                        child: Text(
+                          "💰 Total: \$${data['totalPrice']}",
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+
+                      // Updated "Status" section with black background and white text
+                      Container(
+                        color: Colors.black,
+                        padding: const EdgeInsets.all(8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "📍 Status:",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            DropdownButton<String>(
+                              value: data['status'],
+                              items: [
+                                'pending',
+                                'processing',
+                                'shipped',
+                                'delivered',
+                              ]
+                                  .map(
+                                    (status) => DropdownMenuItem(
+                                      value: status,
+                                      child: Text(
+                                        status,
+                                        style: const TextStyle(color: Colors.white), // White text color
                                       ),
-                                    )
-                                    .toList(),
-                            onChanged: (value) {
-                              if (value != null) {
-                                updateStatus(order.id, value);
-                              }
-                            },
-                          ),
-                        ],
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (value) {
+                                if (value != null) {
+                                  updateStatus(order.id, value);
+                                }
+                              },
+                              dropdownColor: Colors.black, // Optional: Set dropdown background color
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
