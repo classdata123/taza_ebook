@@ -96,17 +96,32 @@ class _DrawState extends State<Draw> {
       child: Wrap(
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 20),
-            child: ListTile(
-              titleAlignment: ListTileTitleAlignment.center,
-              title: Text(userdata!['name']),
-              subtitle: Text(userdata!['email']),
-              leading: CircleAvatar(
-                backgroundColor: AppConstant.appMainbg,
-                child: Text('A'),
+            padding: const EdgeInsets.only(),
+            child: Container(
+              color: Color.fromARGB(255, 30, 29, 30), // black background
+              child: ListTile(
+                titleAlignment: ListTileTitleAlignment.center,
+                title: Text(
+                  userdata!['name'],
+                  style: TextStyle(color: Colors.white), // white text
+                ),
+                subtitle: Text(
+                  userdata!['email'],
+                  style: TextStyle(
+                    color: Colors.white70,
+                  ), // slightly lighter white
+                ),
+                leading: CircleAvatar(
+                  backgroundColor: Colors.white, // white avatar background
+                  child: Text(
+                    'A',
+                    style: TextStyle(color: Colors.black), // black letter
+                  ),
+                ),
               ),
             ),
           ),
+
           Divider(
             indent: 10.0,
             endIndent: 10.0,

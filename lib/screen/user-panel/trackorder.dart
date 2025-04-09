@@ -16,6 +16,13 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
   bool _isLoading = false;
   String? _error;
 
+  final List<String> _statusSteps = [
+    'pending',
+    'processing',
+    'shipped',
+    'delivered',
+  ];
+
   Future<void> fetchOrder() async {
     setState(() {
       _isLoading = true;
@@ -51,6 +58,37 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
     });
   }
 
+  int getStatusIndex(String status) {
+    return _statusSteps.indexOf(status);
+  }
+
+  Widget buildTrackingSteps(String currentStatus) {
+    int currentIndex = getStatusIndex(currentStatus);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: List.generate(_statusSteps.length, (index) {
+        bool isDone = index <= currentIndex;
+        return Row(
+          children: [
+            Icon(
+              isDone ? Icons.check_circle : Icons.radio_button_unchecked,
+              color: isDone ? Colors.green : Colors.grey,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              _statusSteps[index].toUpperCase(),
+              style: TextStyle(
+                color: isDone ? Colors.green : Colors.grey,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
   Widget buildOrderInfo() {
     if (_orderData == null) return const SizedBox();
 
@@ -64,10 +102,16 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
         const SizedBox(height: 20),
         Text(
           "📦 Order ID: ${data['orderId']}",
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         Text("🕒 Date: $formattedDate"),
-        Text("📍 Status: ${data['status']}"),
+        const SizedBox(height: 10),
+        Text(
+          "📍 Current Status:",
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 6),
+        buildTrackingSteps(data['status']),
         const Divider(height: 30),
         const Text("🛒 Items:", style: TextStyle(fontWeight: FontWeight.bold)),
         ...List<Widget>.from(

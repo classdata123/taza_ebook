@@ -101,16 +101,25 @@ class CartScreen extends StatelessWidget {
           itemCount: cartController.cartItems.length,
           itemBuilder: (context, index) {
             final item = cartController.cartItems[index];
+            double price = 0.0;
+
+            // Ensure price is a valid number
+            if (item['price'] is String) {
+              price = double.tryParse(item['price']) ?? 0.0;
+            } else if (item['price'] is num) {
+              price = item['price'].toDouble();
+            }
+
             return Card(
               color: Colors.white,
               margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               child: ListTile(
                 leading: const Icon(Icons.book, color: Colors.black),
                 title: Text(
-                  item['title'],
+                  item['title'] ?? "Unknown Title",
                   style: const TextStyle(color: Colors.black),
                 ),
-                subtitle: Text("\$${item['price'].toStringAsFixed(2)}"),
+                subtitle: Text("\$${price.toStringAsFixed(2)}"),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -132,6 +141,19 @@ class CartScreen extends StatelessWidget {
       }),
       bottomNavigationBar: Obx(() {
         if (cartController.cartItems.isEmpty) return const SizedBox.shrink();
+        
+        // Calculate total price based on valid numbers
+        double totalPrice = 0.0;
+        for (var item in cartController.cartItems) {
+          double price = 0.0;
+          if (item['price'] is String) {
+            price = double.tryParse(item['price']) ?? 0.0;
+          } else if (item['price'] is num) {
+            price = item['price'].toDouble();
+          }
+          totalPrice += price * item['quantity'];
+        }
+
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -149,7 +171,7 @@ class CartScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    "\$${cartController.totalPrice.value.toStringAsFixed(2)}",
+                    "\$${totalPrice.toStringAsFixed(2)}", // Ensure total price is correct
                     style: const TextStyle(fontSize: 18, color: Colors.green),
                   ),
                 ],

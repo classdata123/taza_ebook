@@ -14,10 +14,10 @@ class _AdminUsersDashboardState extends State<AdminUsersDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white, // Page background white
       appBar: AppBar(
-        title: Text("Users Dashboard", style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.black,
+        title: Text("Users Details", style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.black, // AppBar black
         iconTheme: IconThemeData(color: Colors.white),
       ),
       body: Padding(
@@ -26,13 +26,13 @@ class _AdminUsersDashboardState extends State<AdminUsersDashboard> {
           children: [
             TextField(
               controller: searchController,
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.black), // Text color black
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.grey[900],
+                fillColor: Colors.grey[200], // Light grey for input
                 hintText: "Search Users",
-                hintStyle: TextStyle(color: Colors.white54),
-                prefixIcon: Icon(Icons.search, color: Colors.white),
+                hintStyle: TextStyle(color: Colors.grey[600]),
+                prefixIcon: Icon(Icons.search, color: Colors.black),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide.none,
@@ -66,7 +66,7 @@ class _AdminUsersDashboardState extends State<AdminUsersDashboard> {
                     itemBuilder: (context, index) {
                       var user = users[index];
                       return Card(
-                        color: Colors.grey[900],
+                        color: Colors.black, // Card color black
                         child: ListTile(
                           title: Text(
                             user['name'],
@@ -76,10 +76,6 @@ class _AdminUsersDashboardState extends State<AdminUsersDashboard> {
                             user['email'],
                             style: TextStyle(color: Colors.white70),
                           ),
-                          // trailing: Text(
-                          //   "Joined: ${user['registration_date']}",
-                          //   style: TextStyle(color: Colors.white54),
-                          // ),
                           onTap: () {
                             _showUserDetails(context, user);
                           },
@@ -101,7 +97,7 @@ class _AdminUsersDashboardState extends State<AdminUsersDashboard> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: Colors.grey[900],
+          backgroundColor: Colors.black, // Dialog background black
           title: Text("User Details", style: TextStyle(color: Colors.white)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -119,10 +115,6 @@ class _AdminUsersDashboardState extends State<AdminUsersDashboard> {
                 "Phone: ${user['phone']}",
                 style: TextStyle(color: Colors.white),
               ),
-              // Text(
-              //   // "Joined: ${user['registration_date']}",
-              //   // style: TextStyle(color: Colors.white),
-              // ),
             ],
           ),
           actions: [
