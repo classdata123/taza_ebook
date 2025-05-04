@@ -1,3 +1,4 @@
+import 'package:ebookapp/utility/app_content.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
@@ -18,6 +19,7 @@ class _CategoryPage extends State<CategoryPage> {
   TextEditingController bookname = TextEditingController();
   TextEditingController price = TextEditingController();
   TextEditingController description = TextEditingController();
+  TextEditingController authorr = TextEditingController();
   TextEditingController category = TextEditingController();
 
   Future<void> pickImage(ImageSource source) async {
@@ -47,6 +49,7 @@ class _CategoryPage extends State<CategoryPage> {
       'name': bookname.text,
       'price': price.text,
       'description': description.text,
+      'author': category.text,
       'category': category.text,
       'image': base64Image,
     });
@@ -61,10 +64,10 @@ class _CategoryPage extends State<CategoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,  // Background color set to white
       appBar: AppBar(
         title: Text("Add Book", style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.black,  // App bar color set to black
         iconTheme: IconThemeData(color: Colors.white),
       ),
       body: Padding(
@@ -74,6 +77,7 @@ class _CategoryPage extends State<CategoryPage> {
             _buildTextField(bookname, "Book Name"),
             _buildTextField(price, "Price"),
             _buildTextField(description, "Description"),
+            _buildTextField(authorr, "Author"),
             _buildTextField(category, "Category"),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
@@ -89,6 +93,7 @@ class _CategoryPage extends State<CategoryPage> {
                     'Bookname': bookname.text,
                     'price': price.text,
                     'description': description.text,
+                    'author': category.text,
                     'category': category.text,
                     'image': base64Image,
                   });
@@ -120,34 +125,39 @@ class _CategoryPage extends State<CategoryPage> {
                   return ListView(
                     children:
                         snapshot.data!.docs.map((doc) {
-                          return ListTile(
-                            title: Text(
-                              doc['Bookname'],
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            subtitle: Text(
-                              "${doc['price']} - ${doc['description']} - ${doc['category']}",
-                              style: TextStyle(color: Colors.white70),
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: Icon(Icons.edit, color: Colors.blue),
-                                  onPressed: () {
-                                    bookname.text = doc['Bookname'];
-                                    price.text = doc['price'];
-                                    description.text = doc['description'];
-                                    category.text = doc['category'];
-                                    base64Image = doc['image'];
-                                    updateBook(doc.id);
-                                  },
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.delete, color: Colors.red),
-                                  onPressed: () => deleteBook(doc.id),
-                                ),
-                              ],
+                          return Card(  // Card added to wrap ListTile
+                            color: Colors.black,  // Card color set to black
+                            margin: EdgeInsets.symmetric(vertical: 8),
+                            child: ListTile(
+                              title: Text(
+                                doc['Bookname'],
+                                style: TextStyle(color: Colors.white),  // Text color set to white
+                              ),
+                              subtitle: Text(
+                                "${doc['price']} - ${doc['description']} - ${doc['category']} - ${doc['author']}",
+                                style: TextStyle(color: Colors.white70),  // Subtitle color set to light white
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.edit, color: Colors.blue),
+                                    onPressed: () {
+                                      bookname.text = doc['Bookname'];
+                                      price.text = doc['price'];
+                                      description.text = doc['description'];
+                                      authorr.text = doc['author'];
+                                      category.text = doc['category'];
+                                      base64Image = doc['image'];
+                                      updateBook(doc.id);
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.delete, color: Colors.red),
+                                    onPressed: () => deleteBook(doc.id),
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         }).toList(),
@@ -166,10 +176,10 @@ class _CategoryPage extends State<CategoryPage> {
       padding: EdgeInsets.only(bottom: 10),
       child: TextField(
         controller: controller,
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(color: Colors.white),  // Text color set to white
         decoration: InputDecoration(
           filled: true,
-          fillColor: Colors.grey[900],
+          fillColor: Colors.black,  // Background color of input field set to black
           hintText: hint,
           hintStyle: TextStyle(color: Colors.white54),
           border: OutlineInputBorder(

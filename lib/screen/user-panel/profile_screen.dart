@@ -1,3 +1,4 @@
+import 'package:ebookapp/screen/Home/bottom.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -80,6 +81,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           },
         ),
       ),
+            bottomNavigationBar: BottomNavBar(),
     );
   }
 

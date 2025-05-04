@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:ebookapp/screen/Home/bottom.dart';
 import 'package:ebookapp/screen/user-panel/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,7 +14,6 @@ class BookDetailScreen extends StatefulWidget {
   final String title;
   final String author;
   final String category;
-  final double rating;
   final String price;
   final String imageUrl;
   final String description;
@@ -23,7 +23,6 @@ class BookDetailScreen extends StatefulWidget {
     required this.title,
     required this.author,
     required this.category,
-    required this.rating,
     required this.price,
     required this.imageUrl,
     required this.description,
@@ -82,6 +81,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+  
     return Scaffold(
       appBar: AppBar(
         title: const Text('Book Details', style: TextStyle(color: Colors.black)),
@@ -123,9 +123,6 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
                       Text("Category: ${widget.category}",
                           style: const TextStyle(fontSize: 14, color: Colors.grey)),
-                      Text("Rating: ⭐ ${widget.rating}/5",
-                          style: const TextStyle(fontSize: 14)),
-                      const SizedBox(height: 10),
                       Text("Price:",
                           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
                       Text("\$ ${widget.price}",
@@ -140,6 +137,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
+                  print(widget.title);
                   cartController.addToCart({
                     'title': widget.title,
                     'author': widget.author,
@@ -167,17 +165,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: "Cart"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Account"),
-        ],
-      ),
+          bottomNavigationBar: BottomNavBar(),
     );
   }
 }

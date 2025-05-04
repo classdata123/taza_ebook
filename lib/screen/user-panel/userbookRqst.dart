@@ -1,4 +1,5 @@
 import 'package:ebookapp/firebase_options.dart';
+import 'package:ebookapp/screen/Home/bottom.dart';
 import 'package:ebookapp/utility/app_content.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -149,6 +150,7 @@ class _UserRequestFormState extends State<UserRequestForm> {
           ],
         ),
       ),
+            bottomNavigationBar: BottomNavBar(),
     );
   }
 

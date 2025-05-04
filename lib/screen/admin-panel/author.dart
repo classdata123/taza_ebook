@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class AdminUsersDashboard extends StatefulWidget {
+class AuthorPage extends StatefulWidget {
   @override
-  _AdminUsersDashboardState createState() => _AdminUsersDashboardState();
+  _AuthorPageState createState() => _AuthorPageState();
 }
 
-class _AdminUsersDashboardState extends State<AdminUsersDashboard> {
+class _AuthorPageState extends State<AuthorPage> {
   final FirebaseFirestore db = FirebaseFirestore.instance;
-  TextEditingController searchController = TextEditingController();
   String searchQuery = "";
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Page background white
+      backgroundColor: Colors.white, // White background
       appBar: AppBar(
-        title: Text("Users Details", style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.black, // AppBar black
+        title: Text("Author Details", style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.black,
         iconTheme: IconThemeData(color: Colors.white),
       ),
       body: Padding(
@@ -25,59 +24,59 @@ class _AdminUsersDashboardState extends State<AdminUsersDashboard> {
         child: Column(
           children: [
             TextField(
-              controller: searchController,
-              style: TextStyle(color: Colors.black), // Text color black
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value.toLowerCase();
+                });
+              },
+              style: TextStyle(color: Colors.black),
               decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.grey[200], // Light grey for input
-                hintText: "Search Users",
+                hintText: "Search by Author or Category",
                 hintStyle: TextStyle(color: Colors.grey[600]),
                 prefixIcon: Icon(Icons.search, color: Colors.black),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide.none,
                 ),
+                filled: true,
+                fillColor: Colors.grey[200],
               ),
-              onChanged: (value) {
-                setState(() {
-                  searchQuery = value.toLowerCase();
-                });
-              },
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 20),
             Expanded(
               child: StreamBuilder(
-                stream: db.collection('users').snapshots(),
+                stream: db.collection('books').snapshots(),
                 builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (!snapshot.hasData) {
                     return Center(child: CircularProgressIndicator());
                   }
 
-                  var users =
+                  var books =
                       snapshot.data!.docs.where((doc) {
-                        return doc['name'].toLowerCase().contains(
+                        return doc['author'].toLowerCase().contains(
                               searchQuery,
                             ) ||
-                            doc['email'].toLowerCase().contains(searchQuery);
+                            doc['category'].toLowerCase().contains(searchQuery);
                       }).toList();
 
                   return ListView.builder(
-                    itemCount: users.length,
+                    itemCount: books.length,
                     itemBuilder: (context, index) {
-                      var user = users[index];
+                      var book = books[index];
                       return Card(
-                        color: Colors.black, // Card color black
+                        color: Colors.black, // Card black
+                        margin: EdgeInsets.symmetric(vertical: 8),
                         child: ListTile(
                           title: Text(
-                            user['name'],
+                            book['Bookname'],
                             style: TextStyle(color: Colors.white),
                           ),
                           subtitle: Text(
-                            user['email'],
+                            "${book['author']} - ${book['category']}",
                             style: TextStyle(color: Colors.white70),
                           ),
                           onTap: () {
-                            _showUserDetails(context, user);
+                            _showBookDetails(context, book);
                           },
                         ),
                       );
@@ -92,27 +91,31 @@ class _AdminUsersDashboardState extends State<AdminUsersDashboard> {
     );
   }
 
-  void _showUserDetails(BuildContext context, QueryDocumentSnapshot user) {
+  void _showBookDetails(BuildContext context, QueryDocumentSnapshot book) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           backgroundColor: Colors.black, // Dialog background black
-          title: Text("User Details", style: TextStyle(color: Colors.white)),
+          title: Text("Book Details", style: TextStyle(color: Colors.white)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Name: ${user['name']}",
+                "Book Name: ${book['Bookname']}",
                 style: TextStyle(color: Colors.white),
               ),
               Text(
-                "Email: ${user['email']}",
+                "Author: ${book['author']}",
                 style: TextStyle(color: Colors.white),
               ),
               Text(
-                "Phone: ${user['phone']}",
+                "Category: ${book['category']}",
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                "Description: ${book['description']}",
                 style: TextStyle(color: Colors.white),
               ),
             ],

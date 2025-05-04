@@ -1,34 +1,13 @@
-import 'package:ebookapp/screen/user-panel/profile_screen.dart';
-import 'package:ebookapp/screen/user-panel/wishlist_screen.dart';
+import 'package:ebookapp/screen/Home/Book_details.dart';
+import 'package:ebookapp/screen/Home/bottom.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'book_details.dart';
-
-class HomeScreenContent extends StatefulWidget {
+class HomeScreenContent extends StatelessWidget {
   const HomeScreenContent({super.key});
-
-  @override
-  State<HomeScreenContent> createState() => _HomeScreenContentState();
-}
-
-class _HomeScreenContentState extends State<HomeScreenContent> {
-  int _selectedIndex = 0;
-
-  final List<Widget> _screens = [
-    const HomeTab(),
-     WishlistScreen(), // ✅ Use const if no internal state
-    UserProfileScreen(),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,37 +16,36 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
         title: const Text("Book Store"),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              // TODO: Navigate to search screen
-            },
-          ),
-          IconButton(
             icon: const Icon(Icons.shopping_cart),
             onPressed: () {
-              Get.toNamed('/cart'); // Make sure this route exists
+              Get.toNamed('/cart');
             },
           ),
         ],
       ),
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Wishlist"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-        ],
-      ),
+      body: const HomeTab(selectedCategory: ''),
+      bottomNavigationBar: BottomNavBar(),
     );
   }
 }
 
-class HomeTab extends StatelessWidget {
-  const HomeTab({super.key});
+class HomeTab extends StatefulWidget {
+  final String selectedCategory;
+
+  const HomeTab({super.key, required this.selectedCategory});
+
+  @override
+  State<HomeTab> createState() => _HomeTabState();
+}
+
+class _HomeTabState extends State<HomeTab> {
+  String _selectedCategory = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedCategory = widget.selectedCategory;
+  }
 
   Future<List<String>> fetchCategories() async {
     try {
@@ -85,7 +63,10 @@ class HomeTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Categories", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          // const Text(
+          //   "Categories",
+          //   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          // ),
           const SizedBox(height: 8),
           FutureBuilder<List<String>>(
             future: fetchCategories(),
@@ -102,9 +83,16 @@ class HomeTab extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: categories.map((category) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: Chip(label: Text(category)),
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedCategory = category;
+                        });
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: Chip(label: Text(category)),
+                      ),
                     );
                   }).toList(),
                 ),
@@ -112,7 +100,10 @@ class HomeTab extends StatelessWidget {
             },
           ),
           const SizedBox(height: 20),
-          const Text("New Arrivals", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text(
+            "New Arrivals",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 8),
           _buildBookGrid(),
         ],
@@ -122,7 +113,12 @@ class HomeTab extends StatelessWidget {
 
   Widget _buildBookGrid() {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('books').snapshots(),
+      stream: _selectedCategory.isEmpty
+          ? FirebaseFirestore.instance.collection('books').snapshots()
+          : FirebaseFirestore.instance
+              .collection('books')
+              .where('category', isEqualTo: _selectedCategory)
+              .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
@@ -152,7 +148,6 @@ class HomeTab extends StatelessWidget {
     String title = book['Bookname'] ?? 'No Title';
     String author = book['author'] ?? 'Unknown';
     String category = book['category'] ?? 'N/A';
-    double rating = double.tryParse(book['rating'].toString()) ?? 0.0;
     String price = book['price'] ?? '0';
     String image = book['image'] ?? '';
     String description = book['description'] ?? 'No description available.';
@@ -166,7 +161,6 @@ class HomeTab extends StatelessWidget {
               title: title,
               author: author,
               category: category,
-              rating: rating,
               price: price,
               imageUrl: image,
               description: description,
@@ -186,9 +180,19 @@ class HomeTab extends StatelessWidget {
             _buildBookImage(image),
             Padding(
               padding: const EdgeInsets.all(5.0),
-              child: Text(title, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
-            Text("\$ $price", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+            Text(
+              "\$ $price",
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
+              ),
+            ),
           ],
         ),
       ),
@@ -204,7 +208,11 @@ class HomeTab extends StatelessWidget {
         height: 80,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          return const Icon(Icons.broken_image, size: 50, color: Colors.redAccent);
+          return const Icon(
+            Icons.broken_image,
+            size: 50,
+            color: Colors.redAccent,
+          );
         },
       );
     } else {
@@ -215,7 +223,11 @@ class HomeTab extends StatelessWidget {
           child: Image.memory(bytes, height: 80, fit: BoxFit.cover),
         );
       } catch (e) {
-        return const Icon(Icons.broken_image, size: 50, color: Colors.redAccent);
+        return const Icon(
+          Icons.broken_image,
+          size: 50,
+          color: Colors.redAccent,
+        );
       }
     }
   }

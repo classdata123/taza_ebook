@@ -1,7 +1,10 @@
 import 'package:ebookapp/component/base_scaffold.dart';
+import 'package:ebookapp/screen/admin-panel/author.dart';
+import 'package:ebookapp/screen/admin-panel/userdetail.dart';
 import 'package:ebookapp/utility/app_content.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class AdminDashboard extends StatelessWidget {
   final FirebaseFirestore db = FirebaseFirestore.instance;
@@ -28,48 +31,80 @@ class AdminDashboard extends StatelessWidget {
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,
           children: [
-            _buildDashboardCard("Total Users", "users", Icons.people),
-            _buildDashboardCard("Book Catalog", "books", Icons.book),
-            _buildDashboardCard("Total Sales", "sales", Icons.shopping_cart),
-            _buildDashboardCard("Total Authors", "authors", Icons.person),
+            _buildDashboardCard("Total Users", "users", Icons.people, context),
+            _buildDashboardCard("Book Catalog", "books", Icons.book, context),
+            _buildDashboardCard(
+              "Total Sales",
+              "sales",
+              Icons.shopping_cart,
+              context,
+            ),
+            _buildDashboardCard(
+              "Total Authors",
+              "authors",
+              Icons.person,
+              context,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDashboardCard(String title, String collection, IconData icon) {
+  Widget _buildDashboardCard(
+    String title,
+    String collection,
+    IconData icon,
+    BuildContext context,
+  ) {
     return FutureBuilder<int>(
       future: getTotalCount(collection),
       builder: (context, snapshot) {
-        return Card(
-          color: AppConstant.appMainColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, color: Colors.white, size: 40),
-                SizedBox(height: 10),
-                Text(
-                  title,
-                  style: TextStyle(color: Colors.white, fontSize: 18),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  snapshot.connectionState == ConnectionState.waiting
-                      ? "Loading..."
-                      : snapshot.data.toString(),
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
+        return GestureDetector(
+          onTap: () {
+            if (title == "Total Users") {
+              // Navigate to the Admin Users Dashboard
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AdminUsersDashboard()),
+              );
+            } else if (title == "Total Authors") {
+              // Navigate to the Author List Page
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AuthorPage()), // Navigate to AuthorPage
+              );
+            }
+          },
+          child: Card(
+            color: AppConstant.appMainColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, color: Colors.white, size: 40),
+                  SizedBox(height: 10),
+                  Text(
+                    title,
+                    style: TextStyle(color: Colors.white, fontSize: 18),
                   ),
-                ),
-              ],
+                  SizedBox(height: 10),
+                  Text(
+                    snapshot.connectionState == ConnectionState.waiting
+                        ? "Loading..."
+                        : snapshot.data.toString(),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );

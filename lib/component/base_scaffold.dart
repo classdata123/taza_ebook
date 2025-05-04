@@ -3,6 +3,8 @@ import 'package:ebookapp/component/global_app_bar.dart';
 import 'package:ebookapp/screen/Home/home.dart';
 import 'package:ebookapp/screen/admin-panel/Product.dart';
 import 'package:ebookapp/screen/admin-panel/category.dart';
+import 'package:ebookapp/screen/admin-panel/productdisplay.dart';
+import 'package:ebookapp/screen/admin-panel/show_order.dart';
 import 'package:ebookapp/screen/admin-panel/userdetail.dart';
 import 'package:ebookapp/screen/auth-ui/login.dart';
 import 'package:ebookapp/utility/app_content.dart';
@@ -61,7 +63,7 @@ class _DrawState extends State<Draw> {
   Future<void> fetchUserData() async {
     try {
       QuerySnapshot querySnapshot =
-          await db.collection('users').where('uId', isEqualTo: user!.uid).get();
+          await db.collection('users').where('uid', isEqualTo: user!.uid).get();
 
       if (querySnapshot.docs.isNotEmpty) {
         setState(() {
@@ -94,17 +96,32 @@ class _DrawState extends State<Draw> {
       child: Wrap(
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 20),
-            child: ListTile(
-              titleAlignment: ListTileTitleAlignment.center,
-              title: Text(userdata!['name']),
-              subtitle: Text(userdata!['email']),
-              leading: CircleAvatar(
-                backgroundColor: AppConstant.appMainbg,
-                child: Text('A'),
+            padding: const EdgeInsets.only(),
+            child: Container(
+              color: Color.fromARGB(255, 30, 29, 30), // black background
+              child: ListTile(
+                titleAlignment: ListTileTitleAlignment.center,
+                title: Text(
+                  userdata!['name'],
+                  style: TextStyle(color: Colors.white), // white text
+                ),
+                subtitle: Text(
+                  userdata!['email'],
+                  style: TextStyle(
+                    color: Colors.white70,
+                  ), // slightly lighter white
+                ),
+                leading: CircleAvatar(
+                  backgroundColor: Colors.white, // white avatar background
+                  child: Text(
+                    'A',
+                    style: TextStyle(color: Colors.black), // black letter
+                  ),
+                ),
               ),
             ),
           ),
+
           Divider(
             indent: 10.0,
             endIndent: 10.0,
@@ -186,7 +203,7 @@ class _DrawState extends State<Draw> {
                   MaterialPageRoute(
                     builder:
                         (context) =>
-                            AdminUsersDashboard(), // Replace with your actual Product screen widget
+                            BookDisplayPage(), // Replace with your actual Product screen widget
                   ),
                 );
                 // Add navigation logic here
@@ -207,7 +224,7 @@ class _DrawState extends State<Draw> {
                   MaterialPageRoute(
                     builder:
                         (context) =>
-                            AdminUsersDashboard(), // Replace with your actual Product screen widget
+                            OrdersScreen(), // Replace with your actual Product screen widget
                   ),
                 );
                 // Add navigation logic here
